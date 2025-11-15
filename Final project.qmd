@@ -7,6 +7,8 @@ geometry: margin=0.75in
 
 ## Research Question
 
+Will come up soon
+
 ```{r}
 #| echo: false
 #| message: false
@@ -86,15 +88,4 @@ sleep_numeric <- sleep |>
 student_numeric <- student |>
   select(where(is.numeric))
 
-sleep_cor   <- cor(sleep_numeric,   use = "pairwise.complete.obs")
-student_cor <- cor(student_numeric, use = "pairwise.complete.obs")
-
-# 7. Simple linear model
-
-# For now, here is a valid model using ONLY student variables:
-grade_model <- lm(
-  performance_index ~ hours_studied + sleep_hours,
-  data = student |> drop_na(performance_index, hours_studied, sleep_hours)
-)
-model_summary <- tidy(grade_model)
 ```
