@@ -119,9 +119,20 @@ avg_students <- student |>
             avg_previous_score = mean(previous_scores, na.rm = TRUE),
             avg_hours_studied = mean(hours_studied, na.rm = TRUE))
 
-full_data <- full_join(joined_sleep_factors, avg_students, by = join_by(sleep_hours)) |> drop_na()
+full_data <- full_join(joined_sleep_factors, avg_students, by = join_by(sleep_hours)) |> drop_na() |> distinct()
+
 
 ```
+
+
+
+```{r}
+full_data_clean <- full_data |>
+  select(-c(sleep_hours)) |>
+  relocate(sleep_duration)
+
+```
+
 
 
 ## Research question 1
@@ -159,9 +170,8 @@ ggplot(sleep, aes(sleep_duration, stress_level)) +
 ## Research question 3
 ```{r}
 # Sleep hours vs academic performance index
-ggplot(full_data, aes(x = sleep_hours, y = avg_performance)) +
+ggplot(full_data, aes(x = sleep_duration, y = avg_performance)) +
   geom_point() +
-  geom_line() +
   theme_minimal() +
   labs(
     title = "Average Performance Index by Sleep Hours",
@@ -170,9 +180,8 @@ ggplot(full_data, aes(x = sleep_hours, y = avg_performance)) +
   )
 
 # Sleep hours vs previous scores
-ggplot(full_data, aes(x = sleep_hours, y = avg_previous_score)) +
+ggplot(full_data, aes(x = sleep_duration, y = avg_previous_score)) +
   geom_point() +
-  geom_line() +
   theme_minimal() +
   labs(
     title = "Average Previous Scores by Sleep Hours",
@@ -181,9 +190,8 @@ ggplot(full_data, aes(x = sleep_hours, y = avg_previous_score)) +
   )
 
 # Sleep hours vs hours studied
-ggplot(full_data, aes(x = sleep_hours, y = avg_hours_studied)) +
+ggplot(full_data, aes(x = sleep_duration, y = avg_hours_studied)) +
   geom_point() +
-  geom_line() +
   theme_minimal() +
   labs(
     title = "Average Study Time by Sleep Hours",
@@ -192,9 +200,8 @@ ggplot(full_data, aes(x = sleep_hours, y = avg_hours_studied)) +
   )
 
 # Sleep hours vs exam score (from factors dataset)
-ggplot(full_data, aes(x = sleep_hours, y = avg_score)) +
+ggplot(full_data, aes(x = sleep_duration, y = avg_score)) +
   geom_point() +
-  geom_line() +
   theme_minimal() +
   labs(
     title = "Average Exam Score by Sleep Hours",
@@ -203,9 +210,8 @@ ggplot(full_data, aes(x = sleep_hours, y = avg_score)) +
   )
 
 # Sleep hours vs sleep quality
-ggplot(full_data, aes(x = sleep_hours, y = avg_sleep_quality)) +
+ggplot(full_data, aes(x = sleep_duration, y = avg_sleep_quality)) +
   geom_point() +
-  geom_line() +
   theme_minimal() +
   labs(
     title = "Average Sleep Quality by Sleep Hours",
@@ -214,9 +220,8 @@ ggplot(full_data, aes(x = sleep_hours, y = avg_sleep_quality)) +
   )
 
 # Sleep hours vs stress level
-ggplot(full_data, aes(x = sleep_hours, y = avg_stress_level)) +
+ggplot(full_data, aes(x = sleep_duration, y = avg_stress_level)) +
   geom_point() +
-  geom_line() +
   theme_minimal() +
   labs(
     title = "Average Stress Level by Sleep Hours",
