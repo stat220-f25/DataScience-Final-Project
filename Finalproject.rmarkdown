@@ -1,0 +1,214 @@
+---
+title: "Final Portfolio Project"
+author: "Seth Bonney and Cuong Tran"
+format: pdf
+geometry: margin=0.75in
+---
+
+
+
+## Research Question
+
+Will come up soon
+
+
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(janitor)
+library(broom)
+
+# Import data
+sleep_raw   <- read_csv("Sleep_health_and_lifestyle_dataset.csv")
+student_raw <- read_csv("Student_Performance.csv")
+factors_raw <- read_csv("StudentPerformanceFactors.csv")
+
+# Clean Sleep dataset
+sleep <- sleep_raw |>
+  clean_names() |>
+  select(
+    sleep_duration,              
+    sleep_quality = quality_of_sleep,
+    stress_level,
+    age,
+    gender
+  ) |>
+  drop_na(sleep_duration, sleep_quality, stress_level)
+
+# Create sleep categories
+sleep <- sleep |>
+  mutate(
+    sleep_category = case_when(
+      sleep_duration < 7 ~ "Short sleep",
+      sleep_duration >= 7 & sleep_duration <= 9 ~ "Recommended sleep",
+      sleep_duration > 9 ~ "Long sleep"
+    ),
+    sleep_category = factor(
+      sleep_category,
+      levels = c("Short sleep", "Recommended sleep", "Long sleep")
+    )
+  )
+
+# Clean Student Performance dataset
+student <- student_raw |>
+  clean_names()
+
+student <- student |>
+  select(
+    performance_index,
+    previous_scores,
+    hours_studied,
+    sleep_hours
+  ) |>
+  drop_na(performance_index, previous_scores, hours_studied)
+
+# Clean Student Performance Factors dataset
+factors <- factors_raw |>
+  clean_names()
+factors <- factors |>
+  select(
+    study_hours = hours_studied,     
+    score = previous_scores,
+    sleep_hours = sleep_hours
+  ) |>
+  drop_na()
+
+# Join the datasets by sleep hours 
+
+# STEP 1: link sleep + student performance via sleep duration
+sleep_student <- student |>
+  left_join(
+    sleep |> 
+      select(sleep_duration, sleep_quality, stress_level, sleep_category),
+    by = join_by(sleep_hours == sleep_duration)
+  )
+
+# STEP 2: link in study factors
+full_data <- sleep_student |>
+  left_join(
+    factors,
+    by = join_by(sleep_hours)
+  )
+
+# Summary Tables
+
+sleep_summary <- sleep |>
+  summarise(
+    mean_sleep   = mean(sleep_duration),
+    median_sleep = median(sleep_duration),
+    sd_sleep     = sd(sleep_duration),
+    mean_quality = mean(sleep_quality),
+    mean_stress  = mean(stress_level)
+  )
+
+student_summary <- student |>
+  summarise(
+    mean_grade   = mean(performance_index),
+    median_grade = median(performance_index),
+    mean_prev    = mean(previous_scores),
+    mean_study   = mean(hours_studied)
+  )
+
+# Correlation matrices
+sleep_cor <- sleep |> select(where(is.numeric)) |> cor()
+student_cor <- student |> select(where(is.numeric)) |> cor()
+
+glimpse(sleep_cor)
+glimpse(student_cor)
+
+```
+
+
+
+## Research question 1
+
+
+```{r}
+library(ggplot2)
+ggplot(sleep, aes(sleep_duration)) +
+  geom_histogram(bins = 20) +
+  theme_minimal() +
+  labs(
+    title = "Distribution of Sleep Duration",
+    x = "Sleep hours",
+    y = "Count"
+  )
+
+ggplot(sleep, aes(sleep_category)) +
+  geom_bar() +
+  theme_minimal() +
+  labs(
+    title = "Sleep Category Distribution"
+  )
+
+ggplot(sleep, aes(sleep_duration, stress_level)) +
+  geom_jitter(alpha = 0.3) +
+  geom_smooth(method = "lm", se = TRUE) +
+  theme_minimal() +
+  labs(
+    title = "Sleep Duration vs Stress",
+    x = "Hours of Sleep",
+    y = "Stress Level"
+  )
+
+```
+
+
+
+## Research question 3
+
+
+```{r}
+ggplot(full_data, aes(x = sleep_hours, y = performance_index)) +
+  geom_point(alpha = 0.4) +
+  geom_smooth(method = "lm", se = TRUE, color = "blue") +
+  theme_minimal() +
+  labs(
+    title = "Relationship Between Sleep Hours and Academic Performance",
+    x = "Hours of Sleep",
+    y = "Performance Index"
+  )
+
+full_data |>
+  group_by(sleep_category) |>
+  summarise(
+    mean_perf = mean(performance_index, na.rm = TRUE),
+    n = n()
+  ) |>
+  ggplot(aes(x = sleep_category, y = mean_perf, fill = sleep_category)) +
+  geom_col() +
+  theme_minimal() +
+  labs(
+    title = "Average Performance Index by Sleep Category",
+    x = "Sleep Category",
+    y = "Average Performance Index"
+  ) +
+  scale_fill_brewer(palette = "Blues")
+
+ggplot(full_data, aes(x = sleep_hours, y = previous_scores)) +
+  geom_point(alpha = 0.4) +
+  geom_smooth(method = "lm", se = FALSE, color = "darkgreen") +
+  theme_minimal() +
+  labs(
+    title = "Sleep Hours vs Previous Exam Scores",
+    x = "Hours of Sleep",
+    y = "Previous Exam Score"
+  )
+
+
+ggplot(full_data, aes(x = sleep_hours, y = hours_studied)) +
+  geom_point(alpha = 0.4) +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_minimal() +
+  labs(
+    title = "Sleep Hours vs Study Time",
+    x = "Hours of Sleep",
+    y = "Hours Studied"
+  )
+
+```
+
