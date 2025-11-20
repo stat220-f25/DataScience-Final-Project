@@ -26,7 +26,7 @@ cat_vars <- penguins |> keep(is.factor)
 ui <- fluidPage(
   
   # Application title
-  titlePanel("Exploring Palmer's Penguins Data"),
+  titlePanel("Exploring Sleep Data"),
   
   inputPanel(
     selectInput('xcol', label = 'X Variable', choices = colnames(quant_vars)),
