@@ -40,8 +40,8 @@ sleep <- sleep |>
   mutate(
     sleep_category = case_when(
       sleep_duration < 7 ~ "Short sleep",
-      sleep_duration >= 7 & sleep_duration <= 9 ~ "Recommended sleep",
-      sleep_duration > 9 ~ "Long sleep"
+      sleep_duration >= 7 & sleep_duration < 9 ~ "Recommended sleep",
+      sleep_duration >= 9 ~ "Long sleep"
     ),
     sleep_category = factor(
       sleep_category,
@@ -73,25 +73,7 @@ factors <- factors |>
   ) |>
   drop_na()
 
-# Join the datasets by sleep hours 
-
-# STEP 1: link sleep + student performance via sleep duration
-sleep_student <- student |>
-  left_join(
-    sleep |> 
-      select(sleep_duration, sleep_quality, stress_level, sleep_category),
-    by = join_by(sleep_hours == sleep_duration)
-  )
-
-# STEP 2: link in study factors
-full_data <- sleep_student |>
-  left_join(
-    factors,
-    by = join_by(sleep_hours)
-  )
-
-# Summary Tables
-
+# Some summary statistics 
 sleep_summary <- sleep |>
   summarise(
     mean_sleep   = mean(sleep_duration),
@@ -109,14 +91,38 @@ student_summary <- student |>
     mean_study   = mean(hours_studied)
   )
 
-# Correlation matrices
-sleep_cor <- sleep |> select(where(is.numeric)) |> cor()
-student_cor <- student |> select(where(is.numeric)) |> cor()
+factor_summary <- factors |>
+  summarise(
+    mean_score   = mean(score),
+    mean_sleep    = mean(sleep_hours),
+    mean_study   = mean(study_hours)
+  )
 
-glimpse(sleep_cor)
-glimpse(student_cor)
+# Data Joining
+avg_factors <- factors |>
+  group_by(sleep_hours) |>
+  summarise(avg_study = mean(study_hours, na.rm = TRUE),
+            avg_score = mean(score, na.rm = TRUE))
+
+avg_sleep <- sleep |>
+  mutate(sleep_hours = round(sleep_duration)) |>
+  group_by(sleep_duration) |>
+  summarise(avg_sleep_quality = mean(sleep_quality, na.rm = TRUE),
+            avg_stress_level = mean(stress_level, na.rm = TRUE),
+            sleep_hours = sleep_hours)
+
+joined_sleep_factors <- left_join(avg_factors, avg_sleep, by = join_by(sleep_hours))
+
+avg_students <- student |>
+  group_by(sleep_hours) |>
+  summarise(avg_performance = mean(performance_index, na.rm = TRUE),
+            avg_previous_score = mean(previous_scores, na.rm = TRUE),
+            avg_hours_studied = mean(hours_studied, na.rm = TRUE))
+
+full_data <- full_join(joined_sleep_factors, avg_students, by = join_by(sleep_hours)) |> drop_na()
 
 ```
+
 
 ## Research question 1
 ```{r}
@@ -149,54 +155,74 @@ ggplot(sleep, aes(sleep_duration, stress_level)) +
 
 ```
 
+
 ## Research question 3
 ```{r}
-ggplot(full_data, aes(x = sleep_hours, y = performance_index)) +
-  geom_point(alpha = 0.4) +
-  geom_smooth(method = "lm", se = TRUE, color = "blue") +
+# Sleep hours vs academic performance index
+ggplot(full_data, aes(x = sleep_hours, y = avg_performance)) +
+  geom_point() +
+  geom_line() +
   theme_minimal() +
   labs(
-    title = "Relationship Between Sleep Hours and Academic Performance",
-    x = "Hours of Sleep",
-    y = "Performance Index"
-  )
-
-full_data |>
-  group_by(sleep_category) |>
-  summarise(
-    mean_perf = mean(performance_index, na.rm = TRUE),
-    n = n()
-  ) |>
-  ggplot(aes(x = sleep_category, y = mean_perf, fill = sleep_category)) +
-  geom_col() +
-  theme_minimal() +
-  labs(
-    title = "Average Performance Index by Sleep Category",
-    x = "Sleep Category",
+    title = "Average Performance Index by Sleep Hours",
+    x = "Sleep Hours (rounded)",
     y = "Average Performance Index"
-  ) +
-  scale_fill_brewer(palette = "Blues")
-
-ggplot(full_data, aes(x = sleep_hours, y = previous_scores)) +
-  geom_point(alpha = 0.4) +
-  geom_smooth(method = "lm", se = FALSE, color = "darkgreen") +
-  theme_minimal() +
-  labs(
-    title = "Sleep Hours vs Previous Exam Scores",
-    x = "Hours of Sleep",
-    y = "Previous Exam Score"
   )
 
-
-ggplot(full_data, aes(x = sleep_hours, y = hours_studied)) +
-  geom_point(alpha = 0.4) +
-  geom_smooth(method = "lm", se = FALSE) +
+# Sleep hours vs previous scores
+ggplot(full_data, aes(x = sleep_hours, y = avg_previous_score)) +
+  geom_point() +
+  geom_line() +
   theme_minimal() +
   labs(
-    title = "Sleep Hours vs Study Time",
-    x = "Hours of Sleep",
-    y = "Hours Studied"
+    title = "Average Previous Scores by Sleep Hours",
+    x = "Sleep Hours (rounded)",
+    y = "Average Previous Score"
   )
 
+# Sleep hours vs hours studied
+ggplot(full_data, aes(x = sleep_hours, y = avg_hours_studied)) +
+  geom_point() +
+  geom_line() +
+  theme_minimal() +
+  labs(
+    title = "Average Study Time by Sleep Hours",
+    x = "Sleep Hours (rounded)",
+    y = "Average Hours Studied"
+  )
+
+# Sleep hours vs exam score (from factors dataset)
+ggplot(full_data, aes(x = sleep_hours, y = avg_score)) +
+  geom_point() +
+  geom_line() +
+  theme_minimal() +
+  labs(
+    title = "Average Exam Score by Sleep Hours",
+    x = "Sleep Hours (rounded)",
+    y = "Average Exam Score"
+  )
+
+# Sleep hours vs sleep quality
+ggplot(full_data, aes(x = sleep_hours, y = avg_sleep_quality)) +
+  geom_point() +
+  geom_line() +
+  theme_minimal() +
+  labs(
+    title = "Average Sleep Quality by Sleep Hours",
+    x = "Sleep Hours (rounded)",
+    y = "Average Sleep Quality"
+  )
+
+# Sleep hours vs stress level
+ggplot(full_data, aes(x = sleep_hours, y = avg_stress_level)) +
+  geom_point() +
+  geom_line() +
+  theme_minimal() +
+  labs(
+    title = "Average Stress Level by Sleep Hours",
+    x = "Sleep Hours (rounded)",
+    y = "Average Stress Level"
+  )
 ```
+
 
