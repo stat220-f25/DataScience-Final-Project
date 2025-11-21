@@ -8,7 +8,6 @@ geometry: margin=0.75in
 ## Research Question
 
 Will come up soon
-
 ```{r}
 #| echo: false
 #| message: false
@@ -22,6 +21,38 @@ library(broom)
 sleep_raw   <- read_csv("Sleep_health_and_lifestyle_dataset.csv")
 student_raw <- read_csv("Student_Performance.csv")
 factors_raw <- read_csv("StudentPerformanceFactors.csv")
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| 
+sleep_clean_name <- sleep_raw |> 
+  clean_names() |>
+  mutate(across(where(is.character), 
+                factor)
+         )
+
+student_clean_name <- student_raw |> 
+  clean_names() |>
+  mutate(across(where(is.character), 
+                factor)
+         )
+
+factors_clean_name <- factors_raw |> 
+  clean_names() |>
+  mutate(across(where(is.character), 
+                factor)
+         )
+
+```
+
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
 
 # Clean Sleep dataset
 sleep <- sleep_raw |>
