@@ -15,11 +15,11 @@ library(ggthemes)
 library(purrr)
 
 # You can also run code once here (nonreactive)
-min_mass <- min(penguins$body_mass_g, na.rm = TRUE)
-max_mass <- max(penguins$body_mass_g, na.rm = TRUE)
+min_dur <- min(full_data_clean$sleep_duration, na.rm = TRUE)
+max_dur <- max(full_data_clean$sleep_duration, na.rm = TRUE)
 
-quant_vars <- penguins |> keep(is.numeric)
-cat_vars <- penguins |> keep(is.factor)
+quant_vars <- full_data_clean |> keep(is.numeric)
+cat_vars <- full_data_clean |> keep(is.factor)
 
 
 # Define UI for application that draws a histogram
@@ -29,14 +29,14 @@ ui <- fluidPage(
   titlePanel("Exploring Sleep Data"),
   
   inputPanel(
-    selectInput('xcol', label = 'X Variable', choices = colnames(quant_vars)),
-    selectInput('ycol', label = 'Y Variable', choices = colnames(quant_vars), selected = colnames(quant_vars)[2]),
-    selectInput('color', label = 'Color by', choices = colnames(cat_vars), selected = "species"),
-    sliderInput('size', label = 'Point Size', min = 1, max = 10, value = 2),
-    sliderInput('mass', label = 'Bounds for boday mass', 
-                min = min_mass, 
-                max = max_mass, 
-                value = c(min_mass, max_mass)),
+    selectInput('xcol_f', label = 'X Variable', choices = colnames(quant_vars)),
+    selectInput('ycol_f', label = 'Y Variable', choices = colnames(quant_vars), selected = colnames(quant_vars)[2]),
+    # selectInput('color_f', label = 'Color by', choices = colnames(cat_vars)),
+    sliderInput('size_f', label = 'Point Size', min = 1, max = 10, value = 2),
+    sliderInput('duration_f', label = 'Bounds for sleep duration', 
+                min = min_dur, 
+                max = max_dur, 
+                value = c(min_dur, max_dur)),
     checkboxInput('background', label = "Remove background", value = FALSE)
   ),
   
@@ -49,10 +49,10 @@ ui <- fluidPage(
 server <- function(input, output) {
   
   output$scatterPlot <- renderPlot({
-    p <- penguins |>
-      filter(between(body_mass_g, input$mass[1], input$mass[2])) |>
-      ggplot(aes(x = .data[[input$xcol]], y = .data[[input$ycol]], color = .data[[input$color]])) +
-      geom_point(aes(shape = species), size = input$size) +
+    p <- full_data_clean |>
+      filter(between(sleep_duration, input$duration_f[1], input$duration_f[2])) |>
+      ggplot(aes(x = .data[[input$xcol_f]], y = .data[[input$ycol_f]])) +
+      geom_point(aes(), size = input$size_f) +
       scale_color_colorblind()
     if(input$background) {
       p <- p + theme_bw()
@@ -62,7 +62,7 @@ server <- function(input, output) {
   })
   
   output$histogram <- renderPlot({
-    ggplot(penguins, aes(x = .data[[input$xcol]], fill = .data[[input$color]])) +
+    ggplot(full_data_clean, aes(x = .data[[input$xcol_f]])) +
       geom_histogram() +
       scale_fill_colorblind()
   })
