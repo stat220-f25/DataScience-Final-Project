@@ -136,6 +136,8 @@ full_data_clean <- full_data |>
 
 
 ## Research question 1
+
+#These are graphs from the sleep dataset
 ```{r}
 library(ggplot2)
 ggplot(sleep, aes(sleep_duration)) +
@@ -148,21 +150,106 @@ ggplot(sleep, aes(sleep_duration)) +
   )
 
 ggplot(sleep, aes(sleep_category)) +
-  geom_bar() +
+  geom_bar(fill = "skyblue", alpha = 0.8) +
   theme_minimal() +
   labs(
-    title = "Sleep Category Distribution"
+    title = "Distribution of Sleep Categories",
+    x = "Sleep Category",
+    y = "Count"
   )
 
-ggplot(sleep, aes(sleep_duration, stress_level)) +
-  geom_jitter(alpha = 0.3) +
-  geom_smooth(method = "lm", se = TRUE) +
+ggplot(sleep, aes(x = sleep_duration, y = sleep_quality)) +
+  geom_jitter(alpha = 0.4) +
+  geom_smooth(method = "lm", se = TRUE, color = "darkblue") +
   theme_minimal() +
   labs(
-    title = "Sleep Duration vs Stress",
-    x = "Hours of Sleep",
+    title = "Sleep Duration vs Sleep Quality",
+    x = "Sleep Duration (hours)",
+    y = "Sleep Quality"
+  )
+
+ggplot(sleep, aes(x = sleep_duration, y = stress_level)) +
+  geom_jitter(alpha = 0.3) +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  theme_minimal() +
+  labs(
+    title = "Sleep Duration vs Stress Level",
+    x = "Sleep Duration (hours)",
     y = "Stress Level"
   )
+
+sleep |>
+  group_by(sleep_category) |>
+  summarise(mean_stress = mean(stress_level)) |>
+  ggplot(aes(sleep_category, mean_stress, fill = sleep_category)) +
+  geom_col(alpha = 0.8) +
+  theme_minimal() +
+  labs(
+    title = "Average Stress Level by Sleep Category",
+    x = "Sleep Category",
+    y = "Mean Stress Level"
+  )
+
+```
+
+
+# graphs for the student performance dataset
+```{r}
+ggplot(student, aes(x = hours_studied, y = performance_index)) +
+  geom_point(alpha = 0.4) +
+  geom_smooth(method = "lm", se = TRUE, color = "purple") +
+  theme_minimal() +
+  labs(
+    title = "Study Time vs Performance Index",
+    x = "Hours Studied",
+    y = "Performance Index"
+  )
+
+ggplot(student, aes(x = sleep_hours, y = performance_index)) +
+  geom_point(alpha = 0.4) +
+  geom_smooth(method = "lm", se = TRUE, color = "forestgreen") +
+  theme_minimal() +
+  labs(
+    title = "Sleep Hours vs Academic Performance",
+    x = "Sleep Hours",
+    y = "Performance Index"
+  )
+
+ggplot(student, aes(x = previous_scores, y = performance_index)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(
+    title = "Previous Scores vs Academic Performance",
+    x = "Previous Scores",
+    y = "Performance Index"
+  )
+
+
+```
+
+
+# Graphs for the factor dataset
+```{r}
+ggplot(factors, aes(x = study_hours, y = score)) +
+  geom_point(alpha = 0.4) +
+  geom_smooth(method = "lm", se = TRUE, color = "darkred") +
+  theme_minimal() +
+  labs(
+    title = "Study Hours vs Exam Score",
+    x = "Study Hours",
+    y = "Exam Score"
+  )
+
+ggplot(factors, aes(x = sleep_hours, y = score)) +
+  geom_point(alpha = 0.4) +
+  geom_smooth(method = "lm", se = TRUE, color = "navy") +
+  theme_minimal() +
+  labs(
+    title = "Sleep Hours vs Exam Score",
+    x = "Sleep Hours",
+    y = "Exam Score"
+  )
+
 
 ```
 
@@ -229,5 +316,3 @@ ggplot(full_data, aes(x = sleep_duration, y = avg_stress_level)) +
     y = "Average Stress Level"
   )
 ```
-
-
