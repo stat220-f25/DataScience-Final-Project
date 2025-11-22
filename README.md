@@ -50,5 +50,5 @@ Our web-based presentation Shiny app is available at by running the `app.R` file
 2. Open the project in RStudio.
 3. Install required packages if needed:
    ```r
-   install.packages(c("tidyverse", "janitor", "broom", "ggplot2"))
+   install.packages(c("tidyverse", "janitor", "broom", "ggplot2"))```
 4. Run `Finalproject.qmd` by rendering for the pdf format and `app.R` for the web presentation
