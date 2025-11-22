@@ -302,7 +302,7 @@ The plot of sleep hours vs. performance index shows a very slight positive slope
 #| message: false
 #| warning: false
 ggplot(student, aes(x = previous_scores, y = performance_index)) +
-  geom_boxplot() +
+  geom_point() +
   theme_minimal() +
   labs(
     title = "Previous Scores vs Academic Performance",
