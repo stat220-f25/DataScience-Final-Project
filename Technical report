@@ -15,14 +15,14 @@ For each dataset we:
 - Selected only the variables relevant to sleep, stress, and academic performance.
 - Converted character variables to factors where appropriate.
 - Dropped rows with missing values in key columns using `drop_na()`.
-In the sleep dataset, we also created a **sleep_category** variable that groups observations into “Short sleep” (<7 hours), “Recommended sleep” (7–9 hours), and “Long sleep” (≥9 hours).
+In the sleep dataset, we also created a sleep_category variable that groups observations into “Short sleep” (<7 hours), “Recommended sleep” (7–9 hours), and “Long sleep” (≥9 hours).
 
-To combine information across datasets for Research Question 3, we aggregated each dataset **by rounded sleep hours**:
+To combine information across datasets for Research Question 3, we aggregated each dataset by rounded sleep hours:
 - From the factors dataset, we computed average study hours and exam scores by `sleep_hours`.
 - From the sleep dataset, we rounded `sleep_duration` to the nearest hour, then computed average sleep quality and stress for each sleep hour.
 - From the student performance dataset, we computed average performance index, previous scores, and hours studied by `sleep_hours`.
 
-We then joined these summaries by `sleep_hours` using `left_join()` and `full_join()` to create a single `full_data` table for plotting.
+We then joined these summaries by `sleep_hours` using `left_join()` and `full_join()` to create a single `full_clean_data` table for plotting.
 
 ## Visualization
 Most of our analysis is based on tidyverse graphics using `ggplot2`. We created:
@@ -35,10 +35,10 @@ Most of our analysis is based on tidyverse graphics using `ggplot2`. We created:
 For the combined dataset we plotted average performance, exam scores, study hours, sleep quality, and stress levels across different sleep durations to show how these quantities move together.
 
 ## Tools Used
-- **tidyverse** (`dplyr`, `ggplot2`, `readr`, `tibble`) for wrangling and visualization.
-- **janitor** for cleaning column names.
-- **broom** for tidy model output.
-We also used Quarto to render our analysis into a reproducible report and will use Quarto/Shiny to build the final web presentation.
+- tidyverse (`dplyr`, `ggplot2`, `readr`, `tibble`) for wrangling and visualization.
+- janitor for cleaning column names.
+- broom for tidy model output.
+We also used Quarto to render our analysis into a reproducible report and will use Shiny to build the final web presentation.
 
 ## Reproducibility
 All code is contained in our Quarto document(s) and R scripts in the GitHub repository. 
