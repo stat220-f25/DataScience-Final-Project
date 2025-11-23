@@ -13,23 +13,62 @@ library(ggplot2)
 library(dplyr)
 library(ggthemes)
 library(purrr)
+library(rlang)
 
 # You can also run code once here (nonreactive)
 x_input_label <- "X Variable"
 y_input_label <- "Y Variable"
 
-quant_vars_slp <- sleep_clean_name |> keep(is.numeric)
-cat_vars_slp <- sleep_clean_name |> keep(is.factor)
+quant_vars <- list(
+  "slp" = sleep_clean_name |> keep(is.numeric),
+  "std" = student_clean_name |> keep(is.numeric),
+  "fct" = factors_clean_name |> keep(is.numeric),
+  "full" = full_data_clean |> keep(is.numeric)
+)
 
-quant_vars_std <- student_clean_name |> keep(is.numeric)
-cat_vars_std <- student_clean_name |> keep(is.factor)
+create_data_panel <- function(title, suffix) {
+  
+  # suffix for output/input IDs and for indexing quant_vars
+  nav_panel(
+    title = title,
+    layout_sidebar(
+      sidebar = sidebar(
+        uiOutput(paste0("url_", suffix)),
+        selectInput(paste0('xcol_', suffix), label = x_input_label, 
+                    choices = colnames(quant_vars[[suffix]])),
+        selectInput(paste0('ycol_', suffix), label = y_input_label, 
+                    choices = colnames(quant_vars[[suffix]]), 
+                    selected = colnames(quant_vars[[suffix]])[2]),
+        
+        uiOutput(paste0("x_range_slider_", suffix)),
+        
+        sliderInput(paste0('size_', suffix), label = 'Point Size', min = 1, max = 10, value = 2),
+        checkboxInput(paste0('scatterline_', suffix), label = "Add best fit line", value = FALSE),
+        checkboxInput(paste0('scattercurve_', suffix), label = "Add best fit curve", value = FALSE),
+        checkboxInput(paste0('background_', suffix), label = "Remove background", value = FALSE)
+      ),
+      
+      textOutput(outputId = paste0("correlation_summary_", suffix)),
+      plotOutput(outputId = paste0("scatterPlot_", suffix))
+    )
+  )
+}
 
-quant_vars_fct <- factors_clean_name |> keep(is.numeric)
-cat_vars_fct <- factors_clean_name |> keep(is.factor)
 
-quant_vars_f <- full_data_clean |> keep(is.numeric)
-cat_vars_f <- full_data_clean |> keep(is.factor)
+# All Panels
+panel_specs <- list(
+  list(title = "Raw Sleep Health Data", suffix = "slp"),
+  list(title = "Raw Student Performance Data", suffix = "std"),
+  list(title = "Raw Student Performance Factors Data", suffix = "fct"),
+  list(title = "Joined and Curated Data", suffix = "full")
+)
 
+scatterplot_panels <- lapply(panel_specs, function(spec) {
+  create_data_panel(
+    title = spec$title,
+    suffix = spec$suffix
+  )
+})
 
 # Define UI for application that draws a histogram
 ui <- page_navbar(
@@ -37,27 +76,7 @@ ui <- page_navbar(
   bg = "#2D89C8",
   inverse = TRUE,
   
-  nav_panel(
-    title = "Raw Sleep Health Data", 
-    layout_sidebar(
-      sidebar = sidebar(
-        uiOutput("url_slp"),
-        
-        selectInput('xcol_slp', label = x_input_label, choices = colnames(quant_vars_slp)),
-        selectInput('ycol_slp', label = y_input_label, choices = colnames(quant_vars_slp), selected = colnames(quant_vars_slp)[2]),
-        
-        uiOutput("x_range_slider_slp"),
-        
-        sliderInput('size_slp', label = 'Point Size', min = 1, max = 10, value = 2),
-        checkboxInput('scatterline_slp', label = "Add best fit line", value = FALSE),
-        checkboxInput('scattercurve_slp', label = "Add best fit curve", value = FALSE),
-        checkboxInput('background_slp', label = "Remove background", value = FALSE)
-      ),
-      textOutput(outputId = "correlation_summary_slp"),
-      plotOutput(outputId = "scatterPlot_slp")
-    )
-    
-  ),
+  !!!scatterplot_panels,
   
   nav_panel(
     title = "Sleep Hours Distribution",
@@ -70,75 +89,11 @@ ui <- page_navbar(
   ),
   
   nav_panel(
-    title = "Raw Student Performance Data", 
-    layout_sidebar(
-      sidebar = sidebar(
-        uiOutput("url_std"),
-        
-        selectInput('xcol_std', label = x_input_label, choices = colnames(quant_vars_std)),
-        selectInput('ycol_std', label = y_input_label, choices = colnames(quant_vars_std), selected = colnames(quant_vars_std)[2]),
-        
-        uiOutput("x_range_slider_std"),
-        
-        sliderInput('size_std', label = 'Point Size', min = 1, max = 10, value = 2),
-        checkboxInput('scatterline_std', label = "Add best fit line", value = FALSE),
-        checkboxInput('scattercurve_std', label = "Add best fit curve", value = FALSE),
-        checkboxInput('background_std', label = "Remove background", value = FALSE)
-      ),
-      textOutput(outputId = "correlation_summary_std"),
-      plotOutput(outputId = "scatterPlot_std")
-    )
-    
-  ),
-  
-  nav_panel(
-    title = "Raw Student Performance Factors Data", 
-    layout_sidebar(
-      sidebar = sidebar(
-        uiOutput("url_fct"),
-        
-        selectInput('xcol_fct', label = x_input_label, choices = colnames(quant_vars_fct)),
-        selectInput('ycol_fct', label = y_input_label, choices = colnames(quant_vars_fct), selected = colnames(quant_vars_fct)[2]),
-        
-        uiOutput("x_range_slider_fct"),
-        
-        sliderInput('size_fct', label = 'Point Size', min = 1, max = 10, value = 2),
-        checkboxInput('scatterline_fct', label = "Add best fit line", value = FALSE),
-        checkboxInput('scattercurve_fct', label = "Add best fit curve", value = FALSE),
-        checkboxInput('background_fct', label = "Remove background", value = FALSE)
-      ),
-      textOutput(outputId = "correlation_summary_fct"),
-      plotOutput(outputId = "scatterPlot_fct")
-    )
-    
-  ),
-  
-  nav_panel(
-    title = "Joined and Curated Data", 
-    layout_sidebar(
-      sidebar = sidebar(
-        selectInput('xcol_f', label = x_input_label, choices = colnames(quant_vars_f)),
-        selectInput('ycol_f', label = y_input_label, choices = colnames(quant_vars_f), selected = colnames(quant_vars_f)[2]),
-        
-        uiOutput("x_range_slider_f"),
-        
-        sliderInput('size_f', label = 'Point Size', min = 1, max = 10, value = 2),
-        checkboxInput('scatterline_f', label = "Add best fit line", value = FALSE),
-        checkboxInput('scattercurve_f', label = "Add best fit curve", value = FALSE),
-        checkboxInput('background_f', label = "Remove background", value = FALSE)
-      ),
-      textOutput(outputId = "correlation_summary_f"),
-      plotOutput(outputId = "scatterPlot_f")
-    )
-    
-  ),
-  
-  nav_panel(
     title = "Analysis", 
     mainPanel(
       
       tags$h2("Introduction"),
-      tags$p("Sleep is one of the first things students sacrifice when school gets busy, but it plays a major role in stress, focus, and academic performance. Late-night studying and inconsistent routines often create a 'night-owl' pattern that feels normal - but might carry hidden costs. In this project, we explore how sleep duration relates to sleep quality, stress levels, study habits, and academic outcomes. To do this, we use three real datasets: the Sleep Health and Lifestyle dataset, which includes sleep duration, sleep quality, stress, age, and gender; the Student Performance dataset, which contains performance index, previous scores, study time, and reported sleep hours; and the Student Performance Factors dataset, which adds information on exam scores, study hours, and additional behavioral variables."),
+      tags$p("Sleep is one of the first things students sacrifice when school gets busy, but it plays a major role in stress, focus, and academic performance. Late-night studying and inconsistent routines often create a 'night-owl' pattern that feels normal - but might carry hidden costs. In this project, we explore how sleep duration relates to sleep quality, stress levels, study habits, and academic outcomes. To do this, we use three real datasets obtained from Kaggle: the Sleep Health and Lifestyle dataset, which includes sleep duration, sleep quality, stress, age, and gender; the Student Performance dataset, which contains performance index, previous scores, study time, and reported sleep hours; and the Student Performance Factors dataset, which adds information on exam scores, study hours, and additional behavioral variables."),
       tags$p("By analyzing these datasets individually and together, we look for consistent patterns connecting sleep to academic performance and well-being. Our visualizations, summaries, and interactive Shiny app help us ask whether students who sleep more report lower stress, whether sleep quality improves with longer sleep, and whether better sleep is linked to stronger academic outcomes. Although sleep is not the only factor shaping performance, our results suggest that adequate sleep is associated with better well-being and slightly higher academic achievement. This helped us highlight the importance of healthy sleep habits in a student’s daily life."),
       
       tags$h2("Research Questions"),
@@ -166,8 +121,8 @@ ui <- page_navbar(
         tags$li(HTML("Well-being Metrics: On the sleep side, average sleep quality rises and average stress level falls as sleep hours increase from short to recommended levels."))
       ),
       
-      tags$p("The combined view suggests that sleep is not a magic bullet that determines academic outcomes by itself."),
-      tags$p("However, students who sleep within the recommended range tend to experience:"),
+      tags$h2("Takeaway"),
+      tags$p("Altogether, this suggests that sleep is not a magic bullet that determines academic outcomes by itself. However, students who sleep within the recommended range tend to experience:"),
       tags$ul(
         tags$li(HTML("Better sleep quality")),
         tags$li(HTML("Lower stress")),
@@ -185,7 +140,8 @@ ui <- page_navbar(
       p("Narayan, N. (2023). Student Performance (Multiple Linear Regression). Retrieved from https://www.kaggle.com/datasets/nikhil7280/student-performance-multiple-linear-regression"),
       p("Ng., L. (Aug 2025). Student Performance Factors. Retrieved from https://www.kaggle.com/datasets/lainguyn123/student-performance-factor"),
       p("Posit. (Jan 10, 2024). Application layout guide. Retrieved from https://shiny.posit.co/r/articles/build/layout-guide/"),
-      p("DeanAttali. (Feb 5, 2017). Create URL hyperlink in R Shiny?. Retrieved from https://stackoverflow.com/a/42048943")
+      p("DeanAttali. (Feb 5, 2017). Create URL hyperlink in R Shiny?. Retrieved from https://stackoverflow.com/a/42048943"),
+      p("GeekForGeeks (Jul 23, 2025). apply(), lapply(), sapply(), and tapply() in R. Retrieved from https://www.geeksforgeeks.org/r-language/apply-lapply-sapply-and-tapply-in-r/")
     )
   )
     
@@ -217,242 +173,188 @@ server <- function(input, output) {
   
   #----------------------------------------------------------------------------------
   
-  # Sleep Data
+  # Loop for the 4 panels
+  suffixes <- c("slp", "std", "fct", "full")
   
-  url_slp <- a("Sleep Health and Lifestyle Dataset", href="https://www.kaggle.com/datasets/uom190346a/sleep-health-and-lifestyle-dataset")
-  output$url_slp <- renderUI({
-    tagList(url_slp)
-  })
+  url_names <- list("slp" = "Sleep Health and Lifestyle Dataset", 
+                    "std" = "Student Performance (Multiple Linear Regression)", 
+                    "fct" = "Student Performance Factors", 
+                    "full" = "Joined and Curated Dataset")
   
-  output$x_range_slider_slp <- renderUI({
-    selected_x_var_slp <- input$xcol_slp
-    data_vector <- sleep_clean_name[[selected_x_var_slp]]
+  url_refs <- list("slp" = "https://www.kaggle.com/datasets/uom190346a/sleep-health-and-lifestyle-dataset", 
+                    "std" = "https://www.kaggle.com/datasets/nikhil7280/student-performance-multiple-linear-regression", 
+                    "fct" = "https://www.kaggle.com/datasets/lainguyn123/student-performance-factors", 
+                    "full" = "")
+  
+  data_source <- list("slp" = sleep_clean_name, 
+                     "std" = student_clean_name, 
+                     "fct" = factors_clean_name, 
+                     "full" = full_data_clean)
+  
+  filtered_data <- list("slp" = NULL, 
+                        "std" = NULL, 
+                        "fct" = NULL, 
+                        "full" = NULL)
+  
+  for (suffix in suffixes) {
     
-    min_val <- min(data_vector, na.rm = TRUE)
-    max_val <- max(data_vector, na.rm = TRUE)
+    local({
+      
+      suf <- suffix
+      
+      # URL of the source datasets, and a placeholder for the created dataset
+      # Example of non-loop code:
+      # output$url_slp <- renderUI({
+      #   tagList(a("Sleep Health and Lifestyle Dataset", href="https://www.kaggle.com/datasets/uom190346a/sleep-health-and-lifestyle-dataset"))
+      # })
+      output[[paste0("url_", suf)]] <- renderUI({
+        if (nchar(url_refs[[suf]]) > 0) {
+          tagList(
+            a(url_names[[suf]], 
+              href = url_refs[[suf]], 
+              target = "_blank")
+          )
+        } else {
+          tagList(
+            tags$p(url_names[[suf]])
+          )
+        }
+      })
+      
+      #---------------------------------------------------------------------------
+      
+      # Slider for the x variable, can't do y due to risk of no datapoint within the double bound
+      # Example code:
+      # output$x_range_slider_slp <- renderUI({
+      #   selected_x_var_slp <- input$xcol_slp
+      #   data_vector <- sleep_clean_name[[selected_x_var_slp]]
+      #   
+      #   min_val <- min(data_vector, na.rm = TRUE)
+      #   max_val <- max(data_vector, na.rm = TRUE)
+      #   
+      #   sliderInput(
+      #     inputId = "x_range_slp",
+      #     label = paste("Bounds for", selected_x_var_slp),
+      #     min = min_val,
+      #     max = max_val,
+      #     value = c(min_val, max_val)
+      #   )
+      # })
+      
+      output[[paste0("x_range_slider_", suf)]] <- renderUI({
+        selected_x_var <- input[[paste0("xcol_", suf)]]
+        data_vector <- data_source[[suf]][[selected_x_var]]
+        
+        min_val <- min(data_vector, na.rm = TRUE)
+        max_val <- max(data_vector, na.rm = TRUE)
+        
+        sliderInput(
+          inputId = paste0("x_range_", suf),
+          label = paste("Bounds for", selected_x_var),
+          min = min_val,
+          max = max_val,
+          value = c(min_val, max_val)
+        )
+      })
+      
+      #---------------------------------------------------------------------------
+      
+      # Filtered dataset based on the range input
+      # Example code:
+      # filtered_data_slp <- reactive({
+      #   req(input$xcol_slp, input$x_range_slp)
+      #
+      #   x_col_name <- input$xcol_slp
+      #   x_min <- input$x_range_slp[1]
+      #   x_max <- input$x_range_slp[2]
+      #
+      #   sleep_clean_name |>
+      #     filter(between(.data[[x_col_name]], x_min, x_max))
+      # })
+      
+      filtered_data[[suf]] <- reactive({
+        required_xcol <- input[[paste0("xcol_", suf)]]
+        required_xrange <- input[[paste0("x_range_", suf)]]
+        req(required_xcol, required_xrange)
+        
+        x_col_name <- required_xcol
+        x_min <- required_xrange[1]
+        x_max <- required_xrange[2]
+        
+        data_source[[suf]] |>
+          filter(between(.data[[x_col_name]], x_min, x_max))
+      })
+      
+      #---------------------------------------------------------------------------
+      
+      # Correlation of the 2 currently selected variables of the current panel
+      # Example code:
+      # output$correlation_summary_slp <- renderText({
+      #   req(input$xcol_slp, input$ycol_slp)
+      #   data <- filtered_data_slp()
+      #   
+      #   x_var <- data[[input$xcol_slp]]
+      #   y_var <- data[[input$ycol_slp]]
+      #   
+      #   cor(x_var, y_var, method = "pearson", use = "complete.obs") |> generate_correlation_summary()
+      # })
+      
+      output[[paste0("correlation_summary_", suf)]] <- renderText({
+        req(input[[paste0("xcol_", suf)]], input[[paste0("ycol_", suf)]])
+        data <- filtered_data[[suf]]()
+        
+        x_var <- data[[input[[paste0("xcol_", suf)]]]]
+        y_var <- data[[input[[paste0("ycol_", suf)]]]]
+        
+        cor(x_var, y_var, method = "pearson", use = "complete.obs") |> generate_correlation_summary()
+      })
+      
+      #---------------------------------------------------------------------------
+      
+      # Scatterplot of the 2 variables
+      # Example Code:
+      # output$scatterPlot_slp <- renderPlot({
+      #   req(input$xcol_slp, input$x_range_slp, input$ycol_slp)
+      #   
+      #   p <- filtered_data_slp() |>
+      #     ggplot(aes(x = .data[[input$xcol_slp]], y = .data[[input$ycol_slp]])) +
+      #     geom_point(aes(), size = input$size_slp) +
+      #     scale_color_colorblind()
+      #   if(input$background_slp) {
+      #     p <- p + theme_bw()
+      #   }
+      #   if(input$scatterline_slp) {
+      #     p <- p + geom_smooth(method = "lm", se = TRUE, color = "darkblue")
+      #   }
+      #   if(input$scattercurve_slp) {
+      #     p <- p + geom_smooth(se = TRUE, color = "red")
+      #   }
+      #   
+      #   p
+      # })
+      
+      output[[paste0("scatterPlot_", suf)]] <- renderPlot({
+        req(input[[paste0("xcol_", suf)]], input[[paste0("x_range_", suf)]], input[[paste0("ycol_", suf)]])
+        
+        p <- filtered_data[[suf]]() |>
+          ggplot(aes(x = .data[[input[[paste0("xcol_", suf)]]]], y = .data[[input[[paste0("ycol_", suf)]]]])) +
+          geom_point(aes(), size = input[[paste0("size_", suf)]]) +
+          scale_color_colorblind()
+        if(input[[paste0("background_", suf)]]) {
+          p <- p + theme_bw()
+        }
+        if(input[[paste0("scatterline_", suf)]]) {
+          p <- p + geom_smooth(method = "lm", se = TRUE, color = "darkblue")
+        }
+        if(input[[paste0("scattercurve_", suf)]]) {
+          p <- p + geom_smooth(se = TRUE, color = "red")
+        }
+        
+        p
+      })
+      
+    })
     
-    sliderInput(
-      inputId = "x_range_slp",
-      label = paste("Bounds for", selected_x_var_slp),
-      min = min_val,
-      max = max_val,
-      value = c(min_val, max_val)
-    )
-  })
-  
-  filtered_data_slp <- reactive({
-    req(input$xcol_slp, input$x_range_slp)
-    sleep_clean_name |>
-      filter(between(.data[[input$xcol_slp]], input$x_range_slp[1], input$x_range_slp[2]))
-  })
-  
-  output$correlation_summary_slp <- renderText({
-    req(input$xcol_slp, input$ycol_slp)
-    data <- filtered_data_slp()
-    
-    x_var <- data[[input$xcol_slp]]
-    y_var <- data[[input$ycol_slp]]
-    
-    cor(x_var, y_var, method = "pearson", use = "complete.obs") |> generate_correlation_summary()
-  })
-  
-  output$scatterPlot_slp <- renderPlot({
-    req(input$xcol_slp, input$x_range_slp, input$ycol_slp)
-    
-    p <- filtered_data_slp() |>
-      ggplot(aes(x = .data[[input$xcol_slp]], y = .data[[input$ycol_slp]])) +
-      geom_point(aes(), size = input$size_slp) +
-      scale_color_colorblind()
-    if(input$background_slp) {
-      p <- p + theme_bw()
-    }
-    if(input$scatterline_slp) {
-      p <- p + geom_smooth(method = "lm", se = TRUE, color = "darkblue")
-    }
-    if(input$scattercurve_slp) {
-      p <- p + geom_smooth(se = TRUE, color = "red")
-    }
-    
-    p
-  })
-  
-  # -------------------------------------------------------------------------------
-  
-  # Student data
-  
-  url_std <- a("Student Performance (Multiple Linear Regression)", href="https://www.kaggle.com/datasets/nikhil7280/student-performance-multiple-linear-regression")
-  output$url_std <- renderUI({
-    tagList(url_std)
-  })
-  
-  output$x_range_slider_std <- renderUI({
-    selected_x_var_std <- input$xcol_std
-    data_vector <- student_clean_name[[selected_x_var_std]]
-    
-    min_val <- min(data_vector, na.rm = TRUE)
-    max_val <- max(data_vector, na.rm = TRUE)
-    
-    sliderInput(
-      inputId = "x_range_std",
-      label = paste("Bounds for", selected_x_var_std),
-      min = min_val,
-      max = max_val,
-      value = c(min_val, max_val)
-    )
-  })
-  
-  filtered_data_std <- reactive({
-    req(input$xcol_std, input$x_range_std)
-    student_clean_name |>
-      filter(between(.data[[input$xcol_std]], input$x_range_std[1], input$x_range_std[2]))
-  })
-  
-  output$correlation_summary_std <- renderText({
-    req(input$xcol_std, input$ycol_std)
-    data <- filtered_data_std()
-    
-    x_var <- data[[input$xcol_std]]
-    y_var <- data[[input$ycol_std]]
-    
-    cor(x_var, y_var, method = "pearson", use = "complete.obs") |> generate_correlation_summary()
-  })
-  
-  output$scatterPlot_std <- renderPlot({
-    req(input$xcol_std, input$x_range_std, input$ycol_std)
-    
-    p <- filtered_data_std() |>
-      ggplot(aes(x = .data[[input$xcol_std]], y = .data[[input$ycol_std]])) +
-      geom_point(aes(), size = input$size_std) +
-      scale_color_colorblind()
-    if(input$background_std) {
-      p <- p + theme_bw()
-    }
-    if(input$scatterline_std) {
-      p <- p + geom_smooth(method = "lm", se = TRUE, color = "darkblue")
-    }
-    if(input$scattercurve_std) {
-      p <- p + geom_smooth(se = TRUE, color = "red")
-    }
-    
-    p
-  })
-  
-  # -------------------------------------------------------------------------------
-  
-  # factors data
-  
-  url_fct <- a("Student Performance Factors", href="https://www.kaggle.com/datasets/lainguyn123/student-performance-factors")
-  output$url_fct <- renderUI({
-    tagList(url_fct)
-  })
-  
-  output$x_range_slider_fct <- renderUI({
-    selected_x_var_fct <- input$xcol_fct
-    data_vector <- factors_clean_name[[selected_x_var_fct]]
-    
-    min_val <- min(data_vector, na.rm = TRUE)
-    max_val <- max(data_vector, na.rm = TRUE)
-    
-    sliderInput(
-      inputId = "x_range_fct",
-      label = paste("Bounds for", selected_x_var_fct),
-      min = min_val,
-      max = max_val,
-      value = c(min_val, max_val)
-    )
-  })
-  
-  filtered_data_fct <- reactive({
-    req(input$xcol_fct, input$x_range_fct)
-    factors_clean_name |>
-      filter(between(.data[[input$xcol_fct]], input$x_range_fct[1], input$x_range_fct[2]))
-  })
-  
-  output$correlation_summary_fct <- renderText({
-    req(input$xcol_fct, input$ycol_fct)
-    data <- filtered_data_fct()
-    
-    x_var <- data[[input$xcol_fct]]
-    y_var <- data[[input$ycol_fct]]
-    
-    cor(x_var, y_var, method = "pearson", use = "complete.obs") |> generate_correlation_summary()
-  })
-  
-  output$scatterPlot_fct <- renderPlot({
-    req(input$xcol_fct, input$x_range_fct, input$ycol_fct)
-    
-    p <- filtered_data_fct() |>
-      ggplot(aes(x = .data[[input$xcol_fct]], y = .data[[input$ycol_fct]])) +
-      geom_point(aes(), size = input$size_fct) +
-      scale_color_colorblind()
-    if(input$background_fct) {
-      p <- p + theme_bw()
-    }
-    if(input$scatterline_fct) {
-      p <- p + geom_smooth(method = "lm", se = TRUE, color = "darkblue")
-    }
-    if(input$scattercurve_fct) {
-      p <- p + geom_smooth(se = TRUE, color = "red")
-    }
-    
-    p
-  })
-  
-  # -------------------------------------------------------------------------------
-  
-  # Full data
-  
-  output$x_range_slider_f <- renderUI({
-    selected_x_var_f <- input$xcol_f
-    data_vector <- full_data_clean[[selected_x_var_f]]
-    
-    min_val <- min(data_vector, na.rm = TRUE)
-    max_val <- max(data_vector, na.rm = TRUE)
-    
-    sliderInput(
-      inputId = "x_range_f",
-      label = paste("Bounds for", selected_x_var_f),
-      min = min_val,
-      max = max_val,
-      value = c(min_val, max_val)
-    )
-  })
-  
-  filtered_data_f <- reactive({
-    req(input$xcol_f, input$x_range_f)
-    full_data_clean |>
-      filter(between(.data[[input$xcol_f]], input$x_range_f[1], input$x_range_f[2]))
-  })
-  
-  output$correlation_summary_f <- renderText({
-    req(input$xcol_f, input$ycol_f)
-    data <- filtered_data_f()
-    
-    x_var <- data[[input$xcol_f]]
-    y_var <- data[[input$ycol_f]]
-    
-    cor(x_var, y_var, method = "pearson", use = "complete.obs") |> generate_correlation_summary()
-  })
-  
-  output$scatterPlot_f <- renderPlot({
-    req(input$xcol_f, input$x_range_f, input$ycol_f)
-    
-    p <- filtered_data_f() |>
-      ggplot(aes(x = .data[[input$xcol_f]], y = .data[[input$ycol_f]])) +
-      geom_point(aes(), size = input$size_f) +
-      scale_color_colorblind()
-    if(input$background_f) {
-      p <- p + theme_bw()
-    }
-    if(input$scatterline_f) {
-      p <- p + geom_smooth(method = "lm", se = TRUE, color = "darkblue")
-    }
-    if(input$scattercurve_f) {
-      p <- p + geom_smooth(se = TRUE, color = "red")
-    }
-    
-    p
-  })
   
   #---------------------------------------------------------------------
   
@@ -469,6 +371,10 @@ server <- function(input, output) {
       )
   })
   
+  #---------------------------------------------------------------------
+  
+  # Histogram analysis
+  
   output$sleep_hours_analysis <- renderText({
     " This tab gives context for the other views: 
     The histogram of `sleep_duration` shows how common different sleep amounts are in the Sleep Health dataset.
@@ -478,9 +384,7 @@ with relatively few people at Very short or very long sleep.
 Use this tab as a starting point to understand what “typical” sleep looks like before digging into relationships in the other tabs."
   })
   
-  
-  #---------------------------------------------------------------------
-  
+  }
 }
 
 # Run the application 
