@@ -37,8 +37,6 @@ ui <- page_navbar(
   bg = "#2D89C8",
   inverse = TRUE,
   
-  
-  
   nav_panel(
     title = "Raw Sleep Health Data", 
     layout_sidebar(
@@ -133,6 +131,42 @@ ui <- page_navbar(
       plotOutput(outputId = "scatterPlot_f")
     )
     
+  ),
+  
+  nav_panel(
+    title = "Analysis", 
+    mainPanel(
+      tags$p("After looking around, we have discovered a few trends in the data:"),
+      tags$p("The scatterplot of sleep duration vs. sleep quality from the Sleep Health and Lifestyle Dataset shows a clear positive relationship: as sleep duration increases, average sleep quality rises. The regression line slopes upward, suggesting that, on average, sleeping more is associated with better-reported sleep quality. In contrast, sleep duration vs. stress level displays a negative relationship: the regression line slopes downward, indicating that individuals who sleep less tend to report higher stress."),
+      tags$p("In the Student Performance dataset, we see a weak positive relationship between hours studied and performance index. As hours studied increase, the regression line rises, indicating that students who study more tend to achieve slightly higher performance scores, although there is substantial variability at each study level. The plot of sleep hours vs. performance index shows a very slight positive slope. Performance does not dramatically jump for any particular sleep value, but students with more sleep tend to have marginally higher performance. This suggests that sleep is beneficial but not the only driver of grades. When we examine previous scores vs. performance index, higher previous scores are associated with higher current performance. This is consistent with the idea that prior academic preparation and ability play a large role in current outcomes. Overall, this dataset suggests that both study time and prior performance are important predictors of academic outcomes, while sleep hours have a small but favorable association with performance."),
+      tags$p("In the Student Performance Factors dataset, study hours vs. exam score shows a generally positive association: as study hours increase, the regression line slopes upward. The effect is not huge, and scores vary a lot at each study level, but the pattern is consistent with the idea that more study is weakly linked to better exam performance. The sleep hours vs. exam score plot shows a nearly flat line with a very small slope. Exam scores do not change dramatically across the observed range of sleep hours. This suggests that, in this particular dataset, study time has a more obvious direct relationship with scores than sleep does, although sleep might still matter indirectly through stress, focus, or consistency."),
+      
+      tags$p("To link the three datasets (student, factors, and sleep), we aggregated each one by rounded sleep hours and then joined the summaries."),
+      tags$ul(
+        tags$li(HTML("Student Dataset: Average performance index and average previous scores.")),
+        tags$li(HTML("Factors Dataset: Average exam score and average study hours.")),
+        tags$li(HTML("Sleep Dataset: Average sleep quality and average stress level."))
+      ),
+      
+      tags$p("Across these combined summaries, several patterns emerge:"),
+      
+      tags$ul(
+        tags$li(HTML("Academic Performance: The average performance index is slightly higher for students sleeping closer to the recommended 7–8 hours. The differences are not huge, but there is no evidence that very short sleep improves performance.")),
+        tags$li(HTML("Stable Factors: Average previous scores and average study hours do not change dramatically across sleep levels, reinforcing that study habits and prior preparation are relatively stable, while sleep is an additional layer on top of those behaviors.")),
+        tags$li(HTML("Exam Scores: Average exam scores vary only modestly with sleep hours, again showing small but generally positive effects of sufficient sleep.")),
+        tags$li(HTML("Well-being Metrics: On the sleep side, average sleep quality rises and average stress level falls as sleep hours increase from short to recommended levels."))
+      ),
+      
+      tags$p("The combined view suggests that sleep is not a magic bullet that determines academic outcomes by itself."),
+      tags$p("However, students who sleep within the recommended range tend to experience:"),
+      tags$ol(
+        tags$li(HTML("Better sleep quality")),
+        tags$li(HTML("Lower stress")),
+        tags$li(HTML("Slightly better academic performance than short sleepers."))
+      ),
+      tags$p("This supports the idea that having consistently short sleep may come with subtle but meaningful academic and well-being costs.")
+      
+    )
   ),
   
   nav_panel(
