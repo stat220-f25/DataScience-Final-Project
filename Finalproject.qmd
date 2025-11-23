@@ -138,7 +138,12 @@ factor_summary <- factors |>
     mean_sleep    = mean(sleep_hours),
     mean_study   = mean(study_hours)
   )
+```
 
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
 # Data Joining
 avg_factors <- factors |>
   group_by(sleep_hours) |>
@@ -183,7 +188,7 @@ full_data_clean <- full_data |>
 #| warning: false
 library(ggplot2)
 ggplot(sleep, aes(sleep_duration)) +
-  geom_histogram(bins = 20) +
+  geom_histogram(bin = 20) +
   theme_minimal() +
   labs(
     title = "Distribution of Sleep Duration",

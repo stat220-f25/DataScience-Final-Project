@@ -13,6 +13,7 @@ library(ggplot2)
 library(dplyr)
 library(ggthemes)
 library(purrr)
+library(bslib)
 
 # You can also run code once here (nonreactive)
 x_input_label <- "Plot-X"
