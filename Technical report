@@ -1,7 +1,7 @@
 # Technical Report - Final Portfolio Project
 
 ## Overview
-Our goal was to investigate how sleeping late relates to stress and academic performance. 
+Our goal was to investigate how sleeping hours relates to stress and academic performance. 
 We used three real-world datasets:
 1. Sleep Health and Lifestyle - information on sleep duration, sleep quality, stress level, age, and gender.  
 2. Student Performance - performance index, previous scores, hours studied, and sleep hours.  
@@ -26,19 +26,14 @@ We then joined these summaries by `sleep_hours` using `left_join()` and `full_jo
 
 ## Visualization
 Most of our analysis is based on tidyverse graphics using `ggplot2`. We created:
-- Histograms and bar charts to describe the distribution of sleep duration and sleep categories.
-- Scatterplots with `geom_point()` and `geom_smooth(method = "lm")` to explore relationships between
-  - sleep duration and sleep quality/stress,
-  - sleep hours and performance index,
-  - study time and performance,
-  - study hours and exam scores.
-For the combined dataset we plotted average performance, exam scores, study hours, sleep quality, and stress levels across different sleep durations to show how these quantities move together.
-
+- Histogram to describe the distribution of sleep duration.
+- Scatterplots with `geom_point()` and `geom_smooth()` to explore relationships between variables
+ 
 ## Tools Used
 - tidyverse (`dplyr`, `ggplot2`, `readr`, `tibble`) for wrangling and visualization.
 - janitor for cleaning column names.
 - broom for tidy model output.
-We also used Quarto to render our analysis into a reproducible report and will use Shiny to build the final web presentation.
+- shiny to make the Shiny app
 
 ## Reproducibility
 All code is contained in our Quarto document(s) and R scripts in the GitHub repository. 
