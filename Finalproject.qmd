@@ -5,17 +5,13 @@ format: pdf
 geometry: margin=0.75in
 ---
 
+# Introduction
+Sleep is one of the first things students sacrifice when school gets busy, but it plays a major role in stress, focus, and academic performance. Late-night studying and inconsistent routines often create a "night-owl" pattern that feels normal - but might carry hidden costs. In this project, we explore how sleep duration relates to sleep quality, stress levels, study habits, and academic outcomes. To do this, we use three real datasets: the Sleep Health and Lifestyle dataset, which includes sleep duration, sleep quality, stress, age, and gender; the Student Performance dataset, which contains performance index, previous scores, study time, and reported sleep hours; and the Student Performance Factors dataset, which adds information on exam scores, study hours, and additional behavioral variables.
+
+By analyzing these datasets individually and together, we look for consistent patterns connecting sleep to academic performance and well-being. Our visualizations, summaries, and interactive Shiny app help us ask whether students who sleep more report lower stress, whether sleep quality improves with longer sleep, and whether better sleep is linked to stronger academic outcomes. Although sleep is not the only factor shaping performance, our results suggest that adequate sleep is associated with better well-being and slightly higher academic achievement. This helped as highlight the importance of healthy sleep habits in a student’s daily life.
+
 # Research Questions
-We investigate how “being a night owl” relates to stress and academic performance using three datasets on sleep and student outcomes. Our project focuses on three questions:
-
-### 1. What do general sleep patterns look like in the Sleep Health and Lifestyle data?
-How much do people sleep on average? How are sleep duration, sleep quality, and stress levels related?
-
-### 2. How are sleep and academic performance related in student-level data?
-Is more sleep associated with higher performance index and exam scores? How does sleep compare to study time in predicting performance?
-
-### 3. How do sleep and study behaviors interact?
-Do students who sleep more also study more (or more efficiently)? Are there “trade-offs” between sleep, stress, and performance?
+We focused on how sleeping relates to stress and academic performance using three datasets on sleep and student outcomes. Our project talks about three questions. The first one was: What do general sleep patterns look like in the Sleep Health and Lifestyle data? Which entails sub-questions such as How much do people sleep on average? How are sleep duration, sleep quality, and stress levels related? The second question was: How are sleep and academic performance related in student-level data? Which also covers sub-questions like, Is more sleep associated with higher performance index and exam scores? How does sleep compare to study time in predicting performance? And the last question was: How do sleep and study behaviors interact? Which also had sub-questions like Do students who sleep more also study more (or are they more efficient)? Are there "trade-offs" between sleep, stress, and performance?
 
 ```{r}
 #| echo: false
@@ -438,19 +434,18 @@ ggplot(full_data, aes(x = sleep_duration, y = avg_stress_level)) +
     y = "Average Stress Level"
   )
 ```
-
-
+# Conclusion
 To link the three datasets, we aggregated each one by rounded sleep hours and then joined the summaries. For each sleep-hour value, we calculated:
 
 -   Average performance index and previous scores (student dataset)
 -   Average exam score and study hours (factors dataset)
 -   Average sleep quality and stress level (sleep dataset)
 
-Across these combined summaries, several patterns emerge:
+Across these combined summaries, we observed several patterns:
 
--   Average performance index is slightly higher for students sleeping closer to the recommended 7–8 hours. The differences are not huge, but there is no evidence that very short sleep improves performance.
--   Average previous scores and average study hours do not change dramatically across sleep levels, reinforcing that study habits and prior preparation are relatively stable, while sleep is an additional layer on top of those behaviors.
+-   Average performance index is slightly higher for students sleeping closer to the recommended 7-8 hours. The differences are not huge, but there is no evidence that very short sleep improves performance.
+-   Average previous scores and average study hours do not change dramatically across sleep levels. This reinforces the notion that study habits and prior preparation are relatively stable, while sleep is an additional layer on top of those behaviors.
 -   Average exam scores vary only modestly with sleep hours, again showing small but generally positive effects of sufficient sleep.
 -   On the sleep side, average sleep quality rises and average stress level falls as sleep hours increase from short to recommended levels.
 
-Putting these results together, the combined view suggests that sleep is not a magic bullet that determines academic outcomes by itself, but students who sleep within the recommended range tend to experience better sleep quality, lower stress, and slightly better academic performance than short sleepers. This supports the idea that being a “night owl” with consistently short sleep may come with subtle but meaningful academic and well-being costs.
+Putting these results together, the combined view suggests that sleep is not a magic bullet that determines academic outcomes by itself, but students who sleep within the recommended range tend to experience better sleep quality, lower stress, and slightly better academic performance than short sleepers. This supports the idea that consistently sleeping late may come with subtle but meaningful academic and well-being costs.

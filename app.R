@@ -399,9 +399,12 @@ server <- function(input, output) {
   })
   
   output$sleep_hours_analysis <- renderText({
-    "The histogram of sleep duration shows that most individuals in the Sleep Health 
-    and Lifestyle dataset sleep between 6 and 8 hours per night, with a fairly tight distribution around this range. 
-    Very short or very long sleep is rare. "
+    " This tab gives context for the other views: 
+    The histogram of `sleep_duration` shows how common different sleep amounts are in the Sleep Health dataset.
+    The accompanying text explains the main pattern: most individuals are clustered around 6 - 8 hours of sleep, 
+with relatively few people at Very short or very long sleep.
+
+Use this tab as a starting point to understand what “typical” sleep looks like before digging into relationships in the other tabs."
   })
 }
 
