@@ -19,11 +19,16 @@ library(rlang)
 x_input_label <- "X Variable"
 y_input_label <- "Y Variable"
 
+data_source <- list("slp" = sleep_final_data, 
+                    "std" = student_final_data, 
+                    "fct" = factors_final_data, 
+                    "full" = full_data_clean)
+
 quant_vars <- list(
-  "slp" = sleep_clean_name |> keep(is.numeric),
-  "std" = student_clean_name |> keep(is.numeric),
-  "fct" = factors_clean_name |> keep(is.numeric),
-  "full" = full_data_clean |> keep(is.numeric)
+  "slp" = data_source[["slp"]] |> keep(is.numeric),
+  "std" = data_source[["std"]] |> keep(is.numeric),
+  "fct" = data_source[["fct"]] |> keep(is.numeric),
+  "full" = data_source[["full"]] |> keep(is.numeric)
 )
 
 create_data_panel <- function(title, suffix) {
@@ -185,11 +190,6 @@ server <- function(input, output) {
                     "std" = "https://www.kaggle.com/datasets/nikhil7280/student-performance-multiple-linear-regression", 
                     "fct" = "https://www.kaggle.com/datasets/lainguyn123/student-performance-factors", 
                     "full" = "")
-  
-  data_source <- list("slp" = sleep_clean_name, 
-                     "std" = student_clean_name, 
-                     "fct" = factors_clean_name, 
-                     "full" = full_data_clean)
   
   filtered_data <- list("slp" = NULL, 
                         "std" = NULL, 
