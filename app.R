@@ -8,6 +8,7 @@
 #
 
 library(shiny)
+library(bslib)
 library(palmerpenguins)
 library(ggplot2)
 library(dplyr)
@@ -50,11 +51,11 @@ ui <- page_navbar(
         
         sliderInput('size_slp', label = 'Point Size', min = 1, max = 10, value = 2),
         checkboxInput('scatterline_slp', label = "Add best fit line", value = FALSE),
+        checkboxInput('scattercurve_slp', label = "Add best fit curve", value = FALSE),
         checkboxInput('background_slp', label = "Remove background", value = FALSE)
       ),
       textOutput(outputId = "correlation_summary_slp"),
-      plotOutput(outputId = "scatterPlot_slp"),
-      plotOutput(outputId = "histogram_slp")
+      plotOutput(outputId = "scatterPlot_slp")
     )
     
   ),
@@ -70,11 +71,11 @@ ui <- page_navbar(
         
         sliderInput('size_std', label = 'Point Size', min = 1, max = 10, value = 2),
         checkboxInput('scatterline_std', label = "Add best fit line", value = FALSE),
+        checkboxInput('scattercurve_std', label = "Add best fit curve", value = FALSE),
         checkboxInput('background_std', label = "Remove background", value = FALSE)
       ),
       textOutput(outputId = "correlation_summary_std"),
-      plotOutput(outputId = "scatterPlot_std"),
-      plotOutput(outputId = "histogram_std")
+      plotOutput(outputId = "scatterPlot_std")
     )
     
   ),
@@ -90,11 +91,11 @@ ui <- page_navbar(
         
         sliderInput('size_fct', label = 'Point Size', min = 1, max = 10, value = 2),
         checkboxInput('scatterline_fct', label = "Add best fit line", value = FALSE),
+        checkboxInput('scattercurve_fct', label = "Add best fit curve", value = FALSE),
         checkboxInput('background_fct', label = "Remove background", value = FALSE)
       ),
       textOutput(outputId = "correlation_summary_fct"),
-      plotOutput(outputId = "scatterPlot_fct"),
-      plotOutput(outputId = "histogram_fct")
+      plotOutput(outputId = "scatterPlot_fct")
     )
     
   ),
@@ -110,14 +111,25 @@ ui <- page_navbar(
         
         sliderInput('size_f', label = 'Point Size', min = 1, max = 10, value = 2),
         checkboxInput('scatterline_f', label = "Add best fit line", value = FALSE),
+        checkboxInput('scattercurve_f', label = "Add best fit curve", value = FALSE),
         checkboxInput('background_f', label = "Remove background", value = FALSE)
       ),
       textOutput(outputId = "correlation_summary_f"),
-      plotOutput(outputId = "scatterPlot_f"),
-      plotOutput(outputId = "histogram_f")
-    ),
+      plotOutput(outputId = "scatterPlot_f")
+    )
+    
+  ),
+  
+  nav_panel(
+    title = "Sleep Hours Distribution",
+    layout_columns(
+      plotOutput(outputId = "sleep_histogram"),
+      textOutput(outputId = "sleep_hours_analysis"),
+      col_widths = c(6, 6) # Assign relative widths
+    )
     
   )
+    
   
   #nav_spacer(),
   #nav_menu(
@@ -200,20 +212,11 @@ server <- function(input, output) {
     if(input$scatterline_slp) {
       p <- p + geom_smooth(method = "lm", se = TRUE, color = "darkblue")
     }
-    
-    p
-  })
-  
-  output$histogram_slp <- renderPlot({
-    h <- filtered_data_slp() |>
-      ggplot(aes(x = .data[[input$xcol_slp]])) +
-      geom_histogram() +
-      scale_fill_colorblind()
-    if(input$background_slp) {
-      h <- h + theme_bw()
+    if(input$scattercurve_slp) {
+      p <- p + geom_smooth(se = TRUE, color = "red")
     }
     
-    h
+    p
   })
   
   # -------------------------------------------------------------------------------
@@ -264,21 +267,11 @@ server <- function(input, output) {
     if(input$scatterline_std) {
       p <- p + geom_smooth(method = "lm", se = TRUE, color = "darkblue")
     }
-    
-    p
-  })
-  
-  output$histogram_std <- renderPlot({
-    h <- student_clean_name |>
-      filter(between(.data[[input$xcol_std]], input$x_range_std[1], input$x_range_std[2])) |>
-      ggplot(aes(x = .data[[input$xcol_std]])) +
-      geom_histogram() +
-      scale_fill_colorblind()
-    if(input$background_std) {
-      h <- h + theme_bw()
+    if(input$scattercurve_std) {
+      p <- p + geom_smooth(se = TRUE, color = "red")
     }
     
-    h
+    p
   })
   
   # -------------------------------------------------------------------------------
@@ -329,20 +322,11 @@ server <- function(input, output) {
     if(input$scatterline_fct) {
       p <- p + geom_smooth(method = "lm", se = TRUE, color = "darkblue")
     }
-    
-    p
-  })
-  
-  output$histogram_fct <- renderPlot({
-    h <- filtered_data_fct() |>
-      ggplot(aes(x = .data[[input$xcol_fct]])) +
-      geom_histogram() +
-      scale_fill_colorblind()
-    if(input$background_fct) {
-      h <- h + theme_bw()
+    if(input$scattercurve_fct) {
+      p <- p + geom_smooth(se = TRUE, color = "red")
     }
     
-    h
+    p
   })
   
   # -------------------------------------------------------------------------------
@@ -393,20 +377,30 @@ server <- function(input, output) {
     if(input$scatterline_f) {
       p <- p + geom_smooth(method = "lm", se = TRUE, color = "darkblue")
     }
+    if(input$scattercurve_f) {
+      p <- p + geom_smooth(se = TRUE, color = "red")
+    }
     
     p
   })
   
-  output$histogram_f <- renderPlot({
-    h <- filtered_data_f() |>
-      ggplot(aes(x = .data[[input$xcol_f]])) +
-      geom_histogram() +
-      scale_fill_colorblind()
-    if(input$background_f) {
-      h <- h + theme_bw()
-    }
-    
-    h
+  #---------------------------------------------------------------------
+  
+  # Histogram of decimal sleep values
+  
+  output$sleep_histogram <- renderPlot({
+    ggplot(sleep, aes(sleep_duration)) +
+      geom_histogram(bins = 20) +
+      theme_minimal() +
+      labs(
+        title = "Distribution of Sleep Duration",
+        x = "Sleep hours",
+        y = "Count"
+      )
+  })
+  
+  output$sleep_hours_analysis <- renderText({
+    "test test"
   })
 }
 
