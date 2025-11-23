@@ -14,9 +14,9 @@ library(janitor)
 library(broom)
 
 # Import data
-sleep_raw   <- read_csv("Sleep_health_and_lifestyle_dataset.csv")
-student_raw <- read_csv("Student_Performance.csv")
-factors_raw <- read_csv("StudentPerformanceFactors.csv")
+sleep_raw   <- read_csv("Data/Sleep_health_and_lifestyle_dataset.csv")
+student_raw <- read_csv("Data/Student_Performance.csv")
+factors_raw <- read_csv("Data/StudentPerformanceFactors.csv")
 ```
 
 
