@@ -358,10 +358,9 @@ display: none;
 <strong>Title:</strong> Academic Impact of Being a Night Owl</p>
 <div id="project-overview" class="section level2">
 <h2>Project Overview</h2>
-<p>This project investigates how “being a night owl” - consistently
-getting short sleep - relates to stress, sleep quality, and academic
-performance. We combine three datasets on sleep and student performance
-to answer questions such as:</p>
+<p>This project investigates how sleeping hours relates to stress, sleep
+quality, and academic performance. We combine three datasets on sleep
+and student performance to answer questions such as:</p>
 <ul>
 <li>What do sleep patterns look like in our sample?</li>
 <li>How are sleep duration, sleep quality, and stress connected?</li>
@@ -387,8 +386,7 @@ students.</li>
 <li>Study hours, sleep hours, exam scores, and related factors.</li>
 </ul></li>
 </ol>
-<p>All data files are stored in the [<code>data/</code>] folder. I am
-planing on doing this</p>
+<p>All data files are stored in the [<code>Data/</code>] folder.</p>
 </div>
 <div id="repository-structure" class="section level2">
 <h2>Repository Structure</h2>
@@ -396,14 +394,57 @@ planing on doing this</p>
 <li><p><code>Finalproject.qmd</code><br />
 Main Quarto document containing the analysis, visualizations, and
 narrative.</p></li>
-<li><p><code>technical_report.txt</code> Brief technical description of
-our methodology and tools.</p></li>
 <li><p><code>app.R</code><br />
 Files used to create the web-based presentation of results.</p></li>
-<li><p><code>data/</code><br />
+<li><p><code>Data/</code><br />
 Contains the three CSV data files used in the analysis.</p></li>
 <li><p><code>README.md</code><br />
 This file. Describes the project and points to key files.</p></li>
+</ul>
+</div>
+</div>
+<div id="techincal-report" class="section level1">
+<h1>Techincal Report</h1>
+<div id="data-cleaning-and-wrangling" class="section level2">
+<h2>Data Cleaning and Wrangling</h2>
+<p>We began by importing all three CSV files with
+<code>readr::read_csv()</code>, then standardized variable names using
+<code>janitor::clean_names()</code>. For each dataset we: - Selected
+only the variables relevant to sleep, stress, and academic performance.
+- Converted character variables to factors where appropriate. - Dropped
+rows with missing values in key columns using <code>drop_na()</code>. In
+the sleep dataset, we also created a sleep_category variable that groups
+observations into “Short sleep” (&lt;7 hours), “Recommended sleep” (7–9
+hours), and “Long sleep” (≥9 hours).</p>
+<p>To combine information across datasets for Research Question 3, we
+aggregated each dataset by rounded sleep hours: - From the factors
+dataset, we computed average study hours and exam scores by
+<code>sleep_hours</code>. - From the sleep dataset, we rounded
+<code>sleep_duration</code> to the nearest hour, then computed average
+sleep quality and stress for each sleep hour. - From the student
+performance dataset, we computed average performance index, previous
+scores, and hours studied by <code>sleep_hours</code>.</p>
+<p>We then joined these summaries by <code>sleep_hours</code> using
+<code>left_join()</code> and <code>full_join()</code> to create a single
+<code>full_clean_data</code> table for plotting.</p>
+</div>
+<div id="visualization" class="section level2">
+<h2>Visualization</h2>
+<p>Most of our analysis is based on tidyverse graphics using
+<code>ggplot2</code>. We created: - Histogram to describe the
+distribution of sleep duration. - Scatterplots with
+<code>geom_point()</code> and <code>geom_smooth()</code> to explore
+relationships between variables</p>
+</div>
+<div id="tools-used" class="section level2">
+<h2>Tools Used</h2>
+<ul>
+<li>tidyverse (<code>dplyr</code>, <code>ggplot2</code>,
+<code>readr</code>, <code>tibble</code>) for wrangling and
+visualization.</li>
+<li>janitor for cleaning column names.</li>
+<li>broom for tidy model output.</li>
+<li>shiny to make the Shiny app</li>
 </ul>
 </div>
 <div id="web-presentation" class="section level2">
@@ -411,15 +452,22 @@ This file. Describes the project and points to key files.</p></li>
 <p>Our web-based presentation Shiny app is available at by running the
 <code>app.R</code> file</p>
 </div>
+<div id="reproducibility" class="section level2">
+<h2>Reproducibility</h2>
+<p>All code is contained in our Quarto document(s) and R scripts in the
+GitHub repository. Anyone with access to the data files and an R
+installation with the required packages can reproduce our results by
+knitting the .qmd file or rerunning the scripts.</p>
+</div>
 <div id="how-to-reproduce" class="section level2">
 <h2>How to Reproduce</h2>
 <ol style="list-style-type: decimal">
-<li>Clone the repository from GitHub.</li>
-<li>Open the project in RStudio.</li>
-<li>Install required packages if needed:
-<code>r    install.packages(c(&quot;tidyverse&quot;, &quot;janitor&quot;, &quot;broom&quot;, &quot;ggplot2&quot;))</code></li>
-<li>Run <code>Finalproject.qmd</code> by rendering for the pdf format
-and <code>app.R</code> for the web presentation</li>
+<li><p>Clone the repository from GitHub.</p></li>
+<li><p>Open the project in RStudio.</p></li>
+<li><p>Install required packages if needed:</p>
+<pre class="r"><code>install.packages(c(&quot;tidyverse&quot;, &quot;janitor&quot;, &quot;broom&quot;, &quot;ggplot2&quot;, &quot;shiny&quot;, &quot;bslib&quot;))</code></pre></li>
+<li><p>Run <code>Finalproject.qmd</code> by rendering for the pdf format
+and <code>app.R</code> for the web presentation</p></li>
 </ol>
 </div>
 </div>
