@@ -399,7 +399,9 @@ server <- function(input, output) {
   })
   
   output$sleep_hours_analysis <- renderText({
-    "test test"
+    "The histogram of sleep duration shows that most individuals in the Sleep 
+    Health and Lifestyle dataset sleep between 6 and 8 hours per night, with a 
+    fairly tight distribution around this range. Very short or very long sleep is rare. "
   })
 }
 
