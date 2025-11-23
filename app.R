@@ -137,23 +137,15 @@ ui <- page_navbar(
   
   nav_panel(
     title = "Citations", 
-    textOutput(outputId = "citation1"),
-    textOutput(outputId = "citation2"),
-    textOutput(outputId = "citation3"),
-    textOutput(outputId = "citation4"),
-    textOutput(outputId = "citation5")
+    mainPanel(
+      p("Tharmalingam, L. (2023). Sleep Health and Lifestyle Dataset. Retrieved from https://www.kaggle.com/datasets/uom190346a/sleep-health-and-lifestyle-dataset"),
+      p("Narayan, N. (2023). Student Performance (Multiple Linear Regression). Retrieved from https://www.kaggle.com/datasets/nikhil7280/student-performance-multiple-linear-regression"),
+      p("Ng., L. (Aug 2025). Student Performance Factors. Retrieved from https://www.kaggle.com/datasets/lainguyn123/student-performance-factor"),
+      p("Posit. (Jan 10, 2024). Application layout guide. Retrieved from https://shiny.posit.co/r/articles/build/layout-guide/"),
+      p("DeanAttali. (Feb 5, 2017). Create URL hyperlink in R Shiny?. Retrieved from https://stackoverflow.com/a/42048943")
+    )
   )
     
-  
-    
-  
-  #nav_spacer(),
-  #nav_menu(
-  #  title = "Links",
-  #  align = "right",
-  #  nav_item(tags$a("Posit", href = "https://posit.co")),
-  #  nav_item(tags$a("Shiny", href = "https://shiny.posit.co"))
-  #)
 )
 
 
@@ -442,37 +434,6 @@ server <- function(input, output) {
   
   
   #---------------------------------------------------------------------
-  
-  # Citations
-  output$citation1 <- renderText({
-    "
-    Tharmalingam, L. (2023). Sleep Health and Lifestyle Dataset. Retrieved from https://www.kaggle.com/datasets/uom190346a/sleep-health-and-lifestyle-dataset
-    "
-  })
-  
-  output$citation2 <- renderText({
-    "
-    Narayan, N. (2023). Student Performance (Multiple Linear Regression). Retrieved from https://www.kaggle.com/datasets/nikhil7280/student-performance-multiple-linear-regression
-    "
-  })
-  
-  output$citation3 <- renderText({
-    "
-    Ng., L. (Aug 2025). Student Performance Factors. Retrieved from https://www.kaggle.com/datasets/lainguyn123/student-performance-factor
-    "
-  })
-  
-  output$citation4 <- renderText({
-    "
-    Posit. (Jan 10, 2024). Application layout guide. Retrieved from https://shiny.posit.co/r/articles/build/layout-guide/
-    "
-  })
-  
-  output$citation5 <- renderText({
-    "
-    DeanAttali. (Feb 5, 2017). Create URL hyperlink in R Shiny?. Retrieved from https://stackoverflow.com/a/42048943
-    "
-  })
   
 }
 
