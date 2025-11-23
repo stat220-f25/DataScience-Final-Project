@@ -40,9 +40,11 @@ ui <- page_navbar(
   
   
   nav_panel(
-    title = "Sleep Dataset", 
+    title = "Raw Sleep Health Data", 
     layout_sidebar(
       sidebar = sidebar(
+        uiOutput("url_slp"),
+        
         selectInput('xcol_slp', label = x_input_label, choices = colnames(quant_vars_slp)),
         selectInput('ycol_slp', label = y_input_label, choices = colnames(quant_vars_slp), selected = colnames(quant_vars_slp)[2]),
         
@@ -60,9 +62,21 @@ ui <- page_navbar(
   ),
   
   nav_panel(
-    title = "Student Dataset", 
+    title = "Sleep Hours Distribution",
+    layout_columns(
+      plotOutput(outputId = "sleep_histogram"),
+      textOutput(outputId = "sleep_hours_analysis"),
+      col_widths = c(6, 6) # Assign relative widths
+    )
+    
+  ),
+  
+  nav_panel(
+    title = "Raw Student Performance Data", 
     layout_sidebar(
       sidebar = sidebar(
+        uiOutput("url_std"),
+        
         selectInput('xcol_std', label = x_input_label, choices = colnames(quant_vars_std)),
         selectInput('ycol_std', label = y_input_label, choices = colnames(quant_vars_std), selected = colnames(quant_vars_std)[2]),
         
@@ -80,9 +94,11 @@ ui <- page_navbar(
   ),
   
   nav_panel(
-    title = "Factors Dataset", 
+    title = "Raw Student Performance Factors Data", 
     layout_sidebar(
       sidebar = sidebar(
+        uiOutput("url_fct"),
+        
         selectInput('xcol_fct', label = x_input_label, choices = colnames(quant_vars_fct)),
         selectInput('ycol_fct', label = y_input_label, choices = colnames(quant_vars_fct), selected = colnames(quant_vars_fct)[2]),
         
@@ -100,7 +116,7 @@ ui <- page_navbar(
   ),
   
   nav_panel(
-    title = "Joined Dataset", 
+    title = "Joined and Curated Data", 
     layout_sidebar(
       sidebar = sidebar(
         selectInput('xcol_f', label = x_input_label, choices = colnames(quant_vars_f)),
@@ -120,14 +136,15 @@ ui <- page_navbar(
   ),
   
   nav_panel(
-    title = "Sleep Hours Distribution",
-    layout_columns(
-      plotOutput(outputId = "sleep_histogram"),
-      textOutput(outputId = "sleep_hours_analysis"),
-      col_widths = c(6, 6) # Assign relative widths
-    )
-    
+    title = "Citations", 
+    textOutput(outputId = "citation1"),
+    textOutput(outputId = "citation2"),
+    textOutput(outputId = "citation3"),
+    textOutput(outputId = "citation4"),
+    textOutput(outputId = "citation5")
   )
+    
+  
     
   
   #nav_spacer(),
@@ -166,6 +183,12 @@ server <- function(input, output) {
   #----------------------------------------------------------------------------------
   
   # Sleep Data
+  
+  url_slp <- a("Sleep Health and Lifestyle Dataset", href="https://www.kaggle.com/datasets/uom190346a/sleep-health-and-lifestyle-dataset")
+  output$url_slp <- renderUI({
+    tagList(url_slp)
+  })
+  
   output$x_range_slider_slp <- renderUI({
     selected_x_var_slp <- input$xcol_slp
     data_vector <- sleep_clean_name[[selected_x_var_slp]]
@@ -221,6 +244,12 @@ server <- function(input, output) {
   # -------------------------------------------------------------------------------
   
   # Student data
+  
+  url_std <- a("Student Performance (Multiple Linear Regression)", href="https://www.kaggle.com/datasets/nikhil7280/student-performance-multiple-linear-regression")
+  output$url_std <- renderUI({
+    tagList(url_std)
+  })
+  
   output$x_range_slider_std <- renderUI({
     selected_x_var_std <- input$xcol_std
     data_vector <- student_clean_name[[selected_x_var_std]]
@@ -276,6 +305,12 @@ server <- function(input, output) {
   # -------------------------------------------------------------------------------
   
   # factors data
+  
+  url_fct <- a("Student Performance Factors", href="https://www.kaggle.com/datasets/lainguyn123/student-performance-factors")
+  output$url_fct <- renderUI({
+    tagList(url_fct)
+  })
+  
   output$x_range_slider_fct <- renderUI({
     selected_x_var_fct <- input$xcol_fct
     data_vector <- factors_clean_name[[selected_x_var_fct]]
@@ -331,6 +366,7 @@ server <- function(input, output) {
   # -------------------------------------------------------------------------------
   
   # Full data
+  
   output$x_range_slider_f <- renderUI({
     selected_x_var_f <- input$xcol_f
     data_vector <- full_data_clean[[selected_x_var_f]]
@@ -403,6 +439,41 @@ server <- function(input, output) {
     and Lifestyle dataset sleep between 6 and 8 hours per night, with a fairly tight distribution around this range. 
     Very short or very long sleep is rare. "
   })
+  
+  
+  #---------------------------------------------------------------------
+  
+  # Citations
+  output$citation1 <- renderText({
+    "
+    Tharmalingam, L. (2023). Sleep Health and Lifestyle Dataset. Retrieved from https://www.kaggle.com/datasets/uom190346a/sleep-health-and-lifestyle-dataset
+    "
+  })
+  
+  output$citation2 <- renderText({
+    "
+    Narayan, N. (2023). Student Performance (Multiple Linear Regression). Retrieved from https://www.kaggle.com/datasets/nikhil7280/student-performance-multiple-linear-regression
+    "
+  })
+  
+  output$citation3 <- renderText({
+    "
+    Ng., L. (Aug 2025). Student Performance Factors. Retrieved from https://www.kaggle.com/datasets/lainguyn123/student-performance-factor
+    "
+  })
+  
+  output$citation4 <- renderText({
+    "
+    Posit. (Jan 10, 2024). Application layout guide. Retrieved from https://shiny.posit.co/r/articles/build/layout-guide/
+    "
+  })
+  
+  output$citation5 <- renderText({
+    "
+    DeanAttali. (Feb 5, 2017). Create URL hyperlink in R Shiny?. Retrieved from https://stackoverflow.com/a/42048943
+    "
+  })
+  
 }
 
 # Run the application 
