@@ -52,10 +52,10 @@ ui <- page_navbar(
         checkboxInput('scatterline_slp', label = "Add best fit line", value = FALSE),
         checkboxInput('background_slp', label = "Remove background", value = FALSE)
       ),
-      # Show a plot of the selected relationship
+      textOutput(outputId = "correlation_summary_slp"),
       plotOutput(outputId = "scatterPlot_slp"),
-      plotOutput(outputId = "histogram_slp"),
-    ),
+      plotOutput(outputId = "histogram_slp")
+    )
     
   ),
   
@@ -72,10 +72,10 @@ ui <- page_navbar(
         checkboxInput('scatterline_std', label = "Add best fit line", value = FALSE),
         checkboxInput('background_std', label = "Remove background", value = FALSE)
       ),
-      # Show a plot of the selected relationship
+      textOutput(outputId = "correlation_summary_std"),
       plotOutput(outputId = "scatterPlot_std"),
-      plotOutput(outputId = "histogram_std"),
-    ),
+      plotOutput(outputId = "histogram_std")
+    )
     
   ),
   
@@ -92,10 +92,10 @@ ui <- page_navbar(
         checkboxInput('scatterline_fct', label = "Add best fit line", value = FALSE),
         checkboxInput('background_fct', label = "Remove background", value = FALSE)
       ),
-      # Show a plot of the selected relationship
+      textOutput(outputId = "correlation_summary_fct"),
       plotOutput(outputId = "scatterPlot_fct"),
-      plotOutput(outputId = "histogram_fct"),
-    ),
+      plotOutput(outputId = "histogram_fct")
+    )
     
   ),
   
@@ -112,9 +112,9 @@ ui <- page_navbar(
         checkboxInput('scatterline_f', label = "Add best fit line", value = FALSE),
         checkboxInput('background_f', label = "Remove background", value = FALSE)
       ),
-      # Show a plot of the selected relationship
-      plotOutput(outputId = "scatterPlot"),
-      plotOutput(outputId = "histogram")
+      textOutput(outputId = "correlation_summary_f"),
+      plotOutput(outputId = "scatterPlot_f"),
+      plotOutput(outputId = "histogram_f")
     ),
     
   )
@@ -131,6 +131,27 @@ ui <- page_navbar(
 
 # Define server logic required to draw a scatterplot
 server <- function(input, output) {
+  # General
+  
+  generate_correlation_summary <- function(r) {
+    if (is.na(r) || is.null(r) || is.infinite(r)) {
+      return("Correlation could not be calculated (data may be constant or insufficient).")
+    }
+    
+    direction <- if (r > 0) "positive" else "negative"
+    
+    abs_r <- abs(r)
+    strength <- case_when(
+      abs_r >= 0.7 ~ "strong",
+      abs_r >= 0.5 ~ "moderate",
+      abs_r >= 0.3 ~ "weak",
+      abs_r >= 0.1 ~ "very weak",
+      TRUE ~ "negligible"
+    )
+    
+    return(sprintf("These variables has a %s %s relationship (r = %.2f).", strength, direction, r))
+  }
+  
   #----------------------------------------------------------------------------------
   
   # Sleep Data
@@ -150,11 +171,26 @@ server <- function(input, output) {
     )
   })
   
+  filtered_data_slp <- reactive({
+    req(input$xcol_slp, input$x_range_slp)
+    sleep_clean_name |>
+      filter(between(.data[[input$xcol_slp]], input$x_range_slp[1], input$x_range_slp[2]))
+  })
+  
+  output$correlation_summary_slp <- renderText({
+    req(input$xcol_slp, input$ycol_slp)
+    data <- filtered_data_slp()
+    
+    x_var <- data[[input$xcol_slp]]
+    y_var <- data[[input$ycol_slp]]
+    
+    cor(x_var, y_var, method = "pearson", use = "complete.obs") |> generate_correlation_summary()
+  })
+  
   output$scatterPlot_slp <- renderPlot({
     req(input$xcol_slp, input$x_range_slp, input$ycol_slp)
     
-    p <- sleep_clean_name |>
-      filter(between(.data[[input$xcol_slp]], input$x_range_slp[1], input$x_range_slp[2])) |>
+    p <- filtered_data_slp() |>
       ggplot(aes(x = .data[[input$xcol_slp]], y = .data[[input$ycol_slp]])) +
       geom_point(aes(), size = input$size_slp) +
       scale_color_colorblind()
@@ -169,8 +205,7 @@ server <- function(input, output) {
   })
   
   output$histogram_slp <- renderPlot({
-    h <- sleep_clean_name |>
-      filter(between(.data[[input$xcol_slp]], input$x_range_slp[1], input$x_range_slp[2])) |>
+    h <- filtered_data_slp() |>
       ggplot(aes(x = .data[[input$xcol_slp]])) +
       geom_histogram() +
       scale_fill_colorblind()
@@ -200,11 +235,26 @@ server <- function(input, output) {
     )
   })
   
+  filtered_data_std <- reactive({
+    req(input$xcol_std, input$x_range_std)
+    student_clean_name |>
+      filter(between(.data[[input$xcol_std]], input$x_range_std[1], input$x_range_std[2]))
+  })
+  
+  output$correlation_summary_std <- renderText({
+    req(input$xcol_std, input$ycol_std)
+    data <- filtered_data_std()
+    
+    x_var <- data[[input$xcol_std]]
+    y_var <- data[[input$ycol_std]]
+    
+    cor(x_var, y_var, method = "pearson", use = "complete.obs") |> generate_correlation_summary()
+  })
+  
   output$scatterPlot_std <- renderPlot({
     req(input$xcol_std, input$x_range_std, input$ycol_std)
     
-    p <- student_clean_name |>
-      filter(between(.data[[input$xcol_std]], input$x_range_std[1], input$x_range_std[2])) |>
+    p <- filtered_data_std() |>
       ggplot(aes(x = .data[[input$xcol_std]], y = .data[[input$ycol_std]])) +
       geom_point(aes(), size = input$size_std) +
       scale_color_colorblind()
@@ -250,11 +300,26 @@ server <- function(input, output) {
     )
   })
   
+  filtered_data_fct <- reactive({
+    req(input$xcol_fct, input$x_range_fct)
+    factors_clean_name |>
+      filter(between(.data[[input$xcol_fct]], input$x_range_fct[1], input$x_range_fct[2]))
+  })
+  
+  output$correlation_summary_fct <- renderText({
+    req(input$xcol_fct, input$ycol_fct)
+    data <- filtered_data_fct()
+    
+    x_var <- data[[input$xcol_fct]]
+    y_var <- data[[input$ycol_fct]]
+    
+    cor(x_var, y_var, method = "pearson", use = "complete.obs") |> generate_correlation_summary()
+  })
+  
   output$scatterPlot_fct <- renderPlot({
     req(input$xcol_fct, input$x_range_fct, input$ycol_fct)
     
-    p <- factors_clean_name |>
-      filter(between(.data[[input$xcol_fct]], input$x_range_fct[1], input$x_range_fct[2])) |>
+    p <- filtered_data_fct() |>
       ggplot(aes(x = .data[[input$xcol_fct]], y = .data[[input$ycol_fct]])) +
       geom_point(aes(), size = input$size_fct) +
       scale_color_colorblind()
@@ -269,8 +334,7 @@ server <- function(input, output) {
   })
   
   output$histogram_fct <- renderPlot({
-    h <- factors_clean_name |>
-      filter(between(.data[[input$xcol_fct]], input$x_range_fct[1], input$x_range_fct[2])) |>
+    h <- filtered_data_fct() |>
       ggplot(aes(x = .data[[input$xcol_fct]])) +
       geom_histogram() +
       scale_fill_colorblind()
@@ -300,11 +364,26 @@ server <- function(input, output) {
     )
   })
   
-  output$scatterPlot <- renderPlot({
+  filtered_data_f <- reactive({
+    req(input$xcol_f, input$x_range_f)
+    full_data_clean |>
+      filter(between(.data[[input$xcol_f]], input$x_range_f[1], input$x_range_f[2]))
+  })
+  
+  output$correlation_summary_f <- renderText({
+    req(input$xcol_f, input$ycol_f)
+    data <- filtered_data_f()
+    
+    x_var <- data[[input$xcol_f]]
+    y_var <- data[[input$ycol_f]]
+    
+    cor(x_var, y_var, method = "pearson", use = "complete.obs") |> generate_correlation_summary()
+  })
+  
+  output$scatterPlot_f <- renderPlot({
     req(input$xcol_f, input$x_range_f, input$ycol_f)
     
-    p <- full_data_clean |>
-      filter(between(.data[[input$xcol_f]], input$x_range_f[1], input$x_range_f[2])) |>
+    p <- filtered_data_f() |>
       ggplot(aes(x = .data[[input$xcol_f]], y = .data[[input$ycol_f]])) +
       geom_point(aes(), size = input$size_f) +
       scale_color_colorblind()
@@ -318,9 +397,8 @@ server <- function(input, output) {
     p
   })
   
-  output$histogram <- renderPlot({
-    h <- full_data_clean |>
-      filter(between(.data[[input$xcol_f]], input$x_range_f[1], input$x_range_f[2])) |>
+  output$histogram_f <- renderPlot({
+    h <- filtered_data_f() |>
       ggplot(aes(x = .data[[input$xcol_f]])) +
       geom_histogram() +
       scale_fill_colorblind()
