@@ -15,8 +15,8 @@ library(ggthemes)
 library(purrr)
 
 # You can also run code once here (nonreactive)
-x_input_label <- "Plot-X"
-y_input_label <- "Scatterplot-Y"
+x_input_label <- "X Variable"
+y_input_label <- "Y Variable"
 
 quant_vars_slp <- sleep_clean_name |> keep(is.numeric)
 cat_vars_slp <- sleep_clean_name |> keep(is.factor)
