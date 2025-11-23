@@ -360,7 +360,11 @@ ggplot(full_data, aes(x = sleep_duration, y = avg_performance)) +
     x = "Sleep Hours (rounded)",
     y = "Average Performance Index"
   )
-
+```
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
 # Sleep hours vs previous scores
 ggplot(full_data, aes(x = sleep_duration, y = avg_previous_score)) +
   geom_point() +
@@ -370,7 +374,11 @@ ggplot(full_data, aes(x = sleep_duration, y = avg_previous_score)) +
     x = "Sleep Hours (rounded)",
     y = "Average Previous Score"
   )
-
+```
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
 # Sleep hours vs hours studied
 ggplot(full_data, aes(x = sleep_duration, y = avg_hours_studied)) +
   geom_point() +
@@ -380,7 +388,11 @@ ggplot(full_data, aes(x = sleep_duration, y = avg_hours_studied)) +
     x = "Sleep Hours (rounded)",
     y = "Average Hours Studied"
   )
-
+```
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
 # Sleep hours vs exam score (from factors dataset)
 ggplot(full_data, aes(x = sleep_duration, y = avg_score)) +
   geom_point() +
@@ -390,20 +402,30 @@ ggplot(full_data, aes(x = sleep_duration, y = avg_score)) +
     x = "Sleep Hours (rounded)",
     y = "Average Exam Score"
   )
-
+```
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
 # Sleep hours vs sleep quality
 ggplot(full_data, aes(x = sleep_duration, y = avg_sleep_quality)) +
   geom_point() +
+  geom_smooth(se = TRUE, color = "navy") +
   theme_minimal() +
   labs(
     title = "Average Sleep Quality by Sleep Hours",
     x = "Sleep Hours (rounded)",
     y = "Average Sleep Quality"
   )
-
+```
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
 # Sleep hours vs stress level
 ggplot(full_data, aes(x = sleep_duration, y = avg_stress_level)) +
   geom_point() +
+  geom_smooth(se = TRUE, color = "navy") +
   theme_minimal() +
   labs(
     title = "Average Stress Level by Sleep Hours",
@@ -411,6 +433,7 @@ ggplot(full_data, aes(x = sleep_duration, y = avg_stress_level)) +
     y = "Average Stress Level"
   )
 ```
+
 
 To link the three datasets, we aggregated each one by rounded sleep hours and then joined the summaries. For each sleep-hour value, we calculated:
 
