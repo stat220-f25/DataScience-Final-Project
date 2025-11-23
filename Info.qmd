@@ -3,6 +3,7 @@ title: "Info"
 format: pdf
 editor: visual
 ---
+<<<<<<< HEAD
 
 # **Welcome!**
 This app lets you explore how sleep, stress, study behavior, and academic performance are related. Each tab shows one of the datasets we used in our project, and you can choose your own variables to plot on the x– and y–axes. We decided to make a separate tab for the histogram distribution because we though it tied directly into answering the major question that was lingering in our heads.
@@ -109,3 +110,5 @@ You can choose any two summary variables as X and Y, such as:
       * Combines study behavior and performance into a higher-level view.
 
 This tab is designed to support our final story: *Students who sleep within the recommended range tend to show higher sleep quality, lower stress, and slightly better academic performance than short sleepers.* It lets you see how patterns line up when we combine all datasets into one “big picture.”
+=======
+>>>>>>> d84eaba2823384374335ea277d6b2c4cfa1b2ac4

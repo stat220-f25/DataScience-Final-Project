@@ -15,8 +15,8 @@ library(ggthemes)
 library(purrr)
 
 # You can also run code once here (nonreactive)
-x_input_label <- "Plot-X"
-y_input_label <- "Scatterplot-Y"
+x_input_label <- "X Variable"
+y_input_label <- "Y Variable"
 
 quant_vars_slp <- sleep_clean_name |> keep(is.numeric)
 cat_vars_slp <- sleep_clean_name |> keep(is.factor)
@@ -37,12 +37,12 @@ ui <- page_navbar(
   bg = "#2D89C8",
   inverse = TRUE,
   
-  
-  
   nav_panel(
-    title = "Sleep Dataset", 
+    title = "Raw Sleep Health Data", 
     layout_sidebar(
       sidebar = sidebar(
+        uiOutput("url_slp"),
+        
         selectInput('xcol_slp', label = x_input_label, choices = colnames(quant_vars_slp)),
         selectInput('ycol_slp', label = y_input_label, choices = colnames(quant_vars_slp), selected = colnames(quant_vars_slp)[2]),
         
@@ -60,9 +60,21 @@ ui <- page_navbar(
   ),
   
   nav_panel(
-    title = "Student Dataset", 
+    title = "Sleep Hours Distribution",
+    layout_columns(
+      plotOutput(outputId = "sleep_histogram"),
+      textOutput(outputId = "sleep_hours_analysis"),
+      col_widths = c(6, 6) # Assign relative widths
+    )
+    
+  ),
+  
+  nav_panel(
+    title = "Raw Student Performance Data", 
     layout_sidebar(
       sidebar = sidebar(
+        uiOutput("url_std"),
+        
         selectInput('xcol_std', label = x_input_label, choices = colnames(quant_vars_std)),
         selectInput('ycol_std', label = y_input_label, choices = colnames(quant_vars_std), selected = colnames(quant_vars_std)[2]),
         
@@ -80,9 +92,11 @@ ui <- page_navbar(
   ),
   
   nav_panel(
-    title = "Factors Dataset", 
+    title = "Raw Student Performance Factors Data", 
     layout_sidebar(
       sidebar = sidebar(
+        uiOutput("url_fct"),
+        
         selectInput('xcol_fct', label = x_input_label, choices = colnames(quant_vars_fct)),
         selectInput('ycol_fct', label = y_input_label, choices = colnames(quant_vars_fct), selected = colnames(quant_vars_fct)[2]),
         
@@ -100,7 +114,7 @@ ui <- page_navbar(
   ),
   
   nav_panel(
-    title = "Joined Dataset", 
+    title = "Joined and Curated Data", 
     layout_sidebar(
       sidebar = sidebar(
         selectInput('xcol_f', label = x_input_label, choices = colnames(quant_vars_f)),
@@ -120,23 +134,52 @@ ui <- page_navbar(
   ),
   
   nav_panel(
-    title = "Sleep Hours Distribution",
-    layout_columns(
-      plotOutput(outputId = "sleep_histogram"),
-      textOutput(outputId = "sleep_hours_analysis"),
-      col_widths = c(6, 6) # Assign relative widths
+    title = "Analysis", 
+    mainPanel(
+      tags$p("After looking around, we have discovered a few trends in the data:"),
+      tags$p("The scatterplot of sleep duration vs. sleep quality from the Sleep Health and Lifestyle Dataset shows a clear positive relationship: as sleep duration increases, average sleep quality rises. The regression line slopes upward, suggesting that, on average, sleeping more is associated with better-reported sleep quality. In contrast, sleep duration vs. stress level displays a negative relationship: the regression line slopes downward, indicating that individuals who sleep less tend to report higher stress."),
+      tags$p("In the Student Performance dataset, we see a weak positive relationship between hours studied and performance index. As hours studied increase, the regression line rises, indicating that students who study more tend to achieve slightly higher performance scores, although there is substantial variability at each study level. The plot of sleep hours vs. performance index shows a very slight positive slope. Performance does not dramatically jump for any particular sleep value, but students with more sleep tend to have marginally higher performance. This suggests that sleep is beneficial but not the only driver of grades. When we examine previous scores vs. performance index, higher previous scores are associated with higher current performance. This is consistent with the idea that prior academic preparation and ability play a large role in current outcomes. Overall, this dataset suggests that both study time and prior performance are important predictors of academic outcomes, while sleep hours have a small but favorable association with performance."),
+      tags$p("In the Student Performance Factors dataset, study hours vs. exam score shows a generally positive association: as study hours increase, the regression line slopes upward. The effect is not huge, and scores vary a lot at each study level, but the pattern is consistent with the idea that more study is weakly linked to better exam performance. The sleep hours vs. exam score plot shows a nearly flat line with a very small slope. Exam scores do not change dramatically across the observed range of sleep hours. This suggests that, in this particular dataset, study time has a more obvious direct relationship with scores than sleep does, although sleep might still matter indirectly through stress, focus, or consistency."),
+      
+      tags$p("To link the three datasets (student, factors, and sleep), we aggregated each one by rounded sleep hours and then joined the summaries."),
+      tags$ul(
+        tags$li(HTML("Student Dataset: Average performance index and average previous scores.")),
+        tags$li(HTML("Factors Dataset: Average exam score and average study hours.")),
+        tags$li(HTML("Sleep Dataset: Average sleep quality and average stress level."))
+      ),
+      
+      tags$p("Across these combined summaries, several patterns emerge:"),
+      
+      tags$ul(
+        tags$li(HTML("Academic Performance: The average performance index is slightly higher for students sleeping closer to the recommended 7–8 hours. The differences are not huge, but there is no evidence that very short sleep improves performance.")),
+        tags$li(HTML("Stable Factors: Average previous scores and average study hours do not change dramatically across sleep levels, reinforcing that study habits and prior preparation are relatively stable, while sleep is an additional layer on top of those behaviors.")),
+        tags$li(HTML("Exam Scores: Average exam scores vary only modestly with sleep hours, again showing small but generally positive effects of sufficient sleep.")),
+        tags$li(HTML("Well-being Metrics: On the sleep side, average sleep quality rises and average stress level falls as sleep hours increase from short to recommended levels."))
+      ),
+      
+      tags$p("The combined view suggests that sleep is not a magic bullet that determines academic outcomes by itself."),
+      tags$p("However, students who sleep within the recommended range tend to experience:"),
+      tags$ol(
+        tags$li(HTML("Better sleep quality")),
+        tags$li(HTML("Lower stress")),
+        tags$li(HTML("Slightly better academic performance than short sleepers."))
+      ),
+      tags$p("This supports the idea that having consistently short sleep may come with subtle but meaningful academic and well-being costs.")
+      
     )
-    
+  ),
+  
+  nav_panel(
+    title = "Citations", 
+    mainPanel(
+      p("Tharmalingam, L. (2023). Sleep Health and Lifestyle Dataset. Retrieved from https://www.kaggle.com/datasets/uom190346a/sleep-health-and-lifestyle-dataset"),
+      p("Narayan, N. (2023). Student Performance (Multiple Linear Regression). Retrieved from https://www.kaggle.com/datasets/nikhil7280/student-performance-multiple-linear-regression"),
+      p("Ng., L. (Aug 2025). Student Performance Factors. Retrieved from https://www.kaggle.com/datasets/lainguyn123/student-performance-factor"),
+      p("Posit. (Jan 10, 2024). Application layout guide. Retrieved from https://shiny.posit.co/r/articles/build/layout-guide/"),
+      p("DeanAttali. (Feb 5, 2017). Create URL hyperlink in R Shiny?. Retrieved from https://stackoverflow.com/a/42048943")
+    )
   )
     
-  
-  #nav_spacer(),
-  #nav_menu(
-  #  title = "Links",
-  #  align = "right",
-  #  nav_item(tags$a("Posit", href = "https://posit.co")),
-  #  nav_item(tags$a("Shiny", href = "https://shiny.posit.co"))
-  #)
 )
 
 
@@ -166,6 +209,12 @@ server <- function(input, output) {
   #----------------------------------------------------------------------------------
   
   # Sleep Data
+  
+  url_slp <- a("Sleep Health and Lifestyle Dataset", href="https://www.kaggle.com/datasets/uom190346a/sleep-health-and-lifestyle-dataset")
+  output$url_slp <- renderUI({
+    tagList(url_slp)
+  })
+  
   output$x_range_slider_slp <- renderUI({
     selected_x_var_slp <- input$xcol_slp
     data_vector <- sleep_clean_name[[selected_x_var_slp]]
@@ -221,6 +270,12 @@ server <- function(input, output) {
   # -------------------------------------------------------------------------------
   
   # Student data
+  
+  url_std <- a("Student Performance (Multiple Linear Regression)", href="https://www.kaggle.com/datasets/nikhil7280/student-performance-multiple-linear-regression")
+  output$url_std <- renderUI({
+    tagList(url_std)
+  })
+  
   output$x_range_slider_std <- renderUI({
     selected_x_var_std <- input$xcol_std
     data_vector <- student_clean_name[[selected_x_var_std]]
@@ -276,6 +331,12 @@ server <- function(input, output) {
   # -------------------------------------------------------------------------------
   
   # factors data
+  
+  url_fct <- a("Student Performance Factors", href="https://www.kaggle.com/datasets/lainguyn123/student-performance-factors")
+  output$url_fct <- renderUI({
+    tagList(url_fct)
+  })
+  
   output$x_range_slider_fct <- renderUI({
     selected_x_var_fct <- input$xcol_fct
     data_vector <- factors_clean_name[[selected_x_var_fct]]
@@ -331,6 +392,7 @@ server <- function(input, output) {
   # -------------------------------------------------------------------------------
   
   # Full data
+  
   output$x_range_slider_f <- renderUI({
     selected_x_var_f <- input$xcol_f
     data_vector <- full_data_clean[[selected_x_var_f]]
@@ -406,6 +468,10 @@ with relatively few people at Very short or very long sleep.
 
 Use this tab as a starting point to understand what “typical” sleep looks like before digging into relationships in the other tabs."
   })
+  
+  
+  #---------------------------------------------------------------------
+  
 }
 
 # Run the application 
