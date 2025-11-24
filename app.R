@@ -19,6 +19,8 @@ library(rlang)
 x_input_label <- "X Variable"
 y_input_label <- "Y Variable"
 
+suffixes <- c("slp", "std", "fct", "full")
+
 data_source <- list("slp" = sleep_final_data, 
                     "std" = student_final_data, 
                     "fct" = factors_final_data, 
@@ -29,6 +31,77 @@ quant_vars <- list(
   "std" = data_source[["std"]] |> keep(is.numeric),
   "fct" = data_source[["fct"]] |> keep(is.numeric),
   "full" = data_source[["full"]] |> keep(is.numeric)
+)
+
+panel_info <- list(
+  "slp" = data_source[["slp"]] |> keep(is.numeric),
+  "std" = data_source[["std"]] |> keep(is.numeric),
+  "fct" = data_source[["fct"]] |> keep(is.numeric),
+  "full" = data_source[["full"]] |> keep(is.numeric)
+)
+
+url_names <- list("slp" = "Sleep Health and Lifestyle Dataset", 
+                  "std" = "Student Performance (Multiple Linear Regression)", 
+                  "fct" = "Student Performance Factors", 
+                  "full" = "Joined and Curated Dataset")
+
+url_refs <- list("slp" = "https://www.kaggle.com/datasets/uom190346a/sleep-health-and-lifestyle-dataset", 
+                 "std" = "https://www.kaggle.com/datasets/nikhil7280/student-performance-multiple-linear-regression", 
+                 "fct" = "https://www.kaggle.com/datasets/lainguyn123/student-performance-factors", 
+                 "full" = "")
+
+filtered_data <- list("slp" = NULL, 
+                      "std" = NULL, 
+                      "fct" = NULL, 
+                      "full" = NULL)
+
+panel_info_text <- list(
+  
+  "slp" = tagList(
+    tags$h5("Exploring Sleep Health and Stress"),
+    tags$p("This tab uses the Sleep Health and Lifestyle dataset."),
+    tags$p("Here you're mainly looking at sleep duration, sleep quality, and stress level, along with age and gender."),
+    tags$ul(
+      tags$li(HTML("X = <code>sleep_duration</code>, Y = <code>stress_level</code>: A negative correlation means that people who sleep more tend to report lower stress.")),
+      tags$li(HTML("X = <code>sleep_duration</code>, Y = <code>sleep_quality</code>: A positive correlation suggests that more sleep is associated with better sleep quality."))
+    ),
+    tags$p(HTML("Use this tab to explore our first research question: <em>What do general sleep patterns look like, and how do sleep duration, quality, and stress relate to each other?</em>"))
+  ),
+  
+  "std" = tagList(
+    tags$h5("Exploring Sleep vs. Study Habits"),
+    tags$p("This tab uses the Student Performance dataset."),
+    tags$p("Key variables here include: `performance_index`, `previous_scores`, `hours_studied`, and `sleep_hours`."),
+    tags$ul(
+      tags$li(HTML("X = <code>sleep_hours</code>, Y = <code>performance_index</code>: Shows how nightly sleep relates to current academic performance. A positive slope suggests that students who sleep more tend to do a bit better.")),
+      tags$li(HTML("X = <code>hours_studied</code>, Y = <code>performance_index</code>: Shows how study time relates to performance. A positive slope suggests “more study, slightly higher performance.”"))
+    ),
+    tags$p("The correlation summary helps compare relationships: a weak but positive correlation for sleep compared to a strong positive correlation for previous scores shows that sleep helps, but is not the only factor."),
+    tags$p(HTML("This tab helps explore: <em>How are sleep and academic performance related, and how does sleep compare to study time and prior performance?</em>"))
+  ),
+  
+  "fct" = tagList(
+    tags$h5("Exploring Behavioral Factors and Exam Scores"),
+    tags$p("This tab uses the Student Performance Factors dataset."),
+    tags$p("Important variables include: `study_hours`, `sleep_hours`, and `score`."),
+    tags$ul(
+      tags$li(HTML("X = <code>study_hours</code>, Y = <code>score</code>: Shows how exam scores respond to increased study.")),
+      tags$li(HTML("X = <code>sleep_hours</code>, Y = <code>score</code>: Shows whether students with more sleep tend to get higher scores."))
+    ),
+    tags$p("A moderate positive correlation between `study_hours` and `score` would support the idea that more study leads to better outcomes."),
+    tags$p(HTML("This tab focuses on the behavioral side of our question: <em>How do sleep and study habits connect to exam performance?</em>"))
+  ),
+  
+  "full" = tagList(
+    tags$h5("Combined Summary by Sleep Hours"),
+    tags$p("The Joined Dataset tab uses a combined dataset that aggregates all three sources by rounded sleep hours. For each sleep-hour value, we summarize:"),
+    tags$ul(
+      tags$li(HTML("Average performance index and previous scores.")),
+      tags$li(HTML("Average exam scores and study hours.")),
+      tags$li(HTML("Average sleep quality and stress levels."))
+    ),
+    tags$p(HTML("This tab supports our final story: <em>Students who sleep within the recommended range tend to show higher sleep quality, lower stress, and slightly better academic performance than short sleepers.</em>"))
+  )
 )
 
 create_data_panel <- function(title, suffix) {
@@ -53,8 +126,23 @@ create_data_panel <- function(title, suffix) {
         checkboxInput(paste0('background_', suffix), label = "Remove background", value = FALSE)
       ),
       
-      textOutput(outputId = paste0("correlation_summary_", suffix)),
-      plotOutput(outputId = paste0("scatterPlot_", suffix))
+      layout_columns(
+        # Left Chart and Correlation Summary
+        tagList(
+          tags$h4(paste("Scatterplot of Variables in", title)), 
+          plotOutput(outputId = paste0("scatterPlot_", suffix)),
+          tags$hr(),
+          textOutput(outputId = paste0("correlation_summary_", suffix))
+        ),
+        
+        # Right: Info Text
+        tagList(
+          tags$h4(paste("Introduction to ", title)),
+          uiOutput(outputId = paste0("info_text_", suffix)) 
+        ),
+        
+        col_widths = c(6, 6) 
+      )
     )
   )
 }
@@ -62,11 +150,13 @@ create_data_panel <- function(title, suffix) {
 
 # All Panels
 panel_specs <- list(
-  list(title = "Raw Sleep Health Data", suffix = "slp"),
-  list(title = "Raw Student Performance Data", suffix = "std"),
-  list(title = "Raw Student Performance Factors Data", suffix = "fct"),
+  list(title = "Sleep Health Data", suffix = "slp"),
+  list(title = "Student Performance Data", suffix = "std"),
+  list(title = "Student Performance Factors Data", suffix = "fct"),
   list(title = "Joined and Curated Data", suffix = "full")
 )
+
+
 
 scatterplot_panels <- lapply(panel_specs, function(spec) {
   create_data_panel(
@@ -80,6 +170,19 @@ ui <- page_navbar(
   title = "Exploring Sleep Data",
   bg = "#2D89C8",
   inverse = TRUE,
+  
+  nav_panel(
+    title = "Homepage",
+    layout_sidebar(
+      sidebar = NULL,
+      tags$h1(HTML("<strong>Welcome!</strong>")),
+      tags$p(
+        "This app lets you explore how sleep, stress, study behavior, and academic performance are related. 
+    Each tab shows one of the datasets we used in our project, and you can choose your own variables to plot on the x– and y–axes. 
+    We decided to make a separate tab for the histogram distribution because we thought it tied directly into answering the major question that was lingering in our heads."
+      ),
+    )
+  ),
   
   !!!scatterplot_panels,
   
@@ -179,22 +282,6 @@ server <- function(input, output) {
   #----------------------------------------------------------------------------------
   
   # Loop for the 4 panels
-  suffixes <- c("slp", "std", "fct", "full")
-  
-  url_names <- list("slp" = "Sleep Health and Lifestyle Dataset", 
-                    "std" = "Student Performance (Multiple Linear Regression)", 
-                    "fct" = "Student Performance Factors", 
-                    "full" = "Joined and Curated Dataset")
-  
-  url_refs <- list("slp" = "https://www.kaggle.com/datasets/uom190346a/sleep-health-and-lifestyle-dataset", 
-                    "std" = "https://www.kaggle.com/datasets/nikhil7280/student-performance-multiple-linear-regression", 
-                    "fct" = "https://www.kaggle.com/datasets/lainguyn123/student-performance-factors", 
-                    "full" = "")
-  
-  filtered_data <- list("slp" = NULL, 
-                        "std" = NULL, 
-                        "fct" = NULL, 
-                        "full" = NULL)
   
   for (suffix in suffixes) {
     
@@ -203,10 +290,7 @@ server <- function(input, output) {
       suf <- suffix
       
       # URL of the source datasets, and a placeholder for the created dataset
-      # Example of non-loop code:
-      # output$url_slp <- renderUI({
-      #   tagList(a("Sleep Health and Lifestyle Dataset", href="https://www.kaggle.com/datasets/uom190346a/sleep-health-and-lifestyle-dataset"))
-      # })
+      
       output[[paste0("url_", suf)]] <- renderUI({
         if (nchar(url_refs[[suf]]) > 0) {
           tagList(
@@ -224,22 +308,6 @@ server <- function(input, output) {
       #---------------------------------------------------------------------------
       
       # Slider for the x variable, can't do y due to risk of no datapoint within the double bound
-      # Example code:
-      # output$x_range_slider_slp <- renderUI({
-      #   selected_x_var_slp <- input$xcol_slp
-      #   data_vector <- sleep_clean_name[[selected_x_var_slp]]
-      #   
-      #   min_val <- min(data_vector, na.rm = TRUE)
-      #   max_val <- max(data_vector, na.rm = TRUE)
-      #   
-      #   sliderInput(
-      #     inputId = "x_range_slp",
-      #     label = paste("Bounds for", selected_x_var_slp),
-      #     min = min_val,
-      #     max = max_val,
-      #     value = c(min_val, max_val)
-      #   )
-      # })
       
       output[[paste0("x_range_slider_", suf)]] <- renderUI({
         selected_x_var <- input[[paste0("xcol_", suf)]]
@@ -260,17 +328,6 @@ server <- function(input, output) {
       #---------------------------------------------------------------------------
       
       # Filtered dataset based on the range input
-      # Example code:
-      # filtered_data_slp <- reactive({
-      #   req(input$xcol_slp, input$x_range_slp)
-      #
-      #   x_col_name <- input$xcol_slp
-      #   x_min <- input$x_range_slp[1]
-      #   x_max <- input$x_range_slp[2]
-      #
-      #   sleep_clean_name |>
-      #     filter(between(.data[[x_col_name]], x_min, x_max))
-      # })
       
       filtered_data[[suf]] <- reactive({
         required_xcol <- input[[paste0("xcol_", suf)]]
@@ -288,16 +345,6 @@ server <- function(input, output) {
       #---------------------------------------------------------------------------
       
       # Correlation of the 2 currently selected variables of the current panel
-      # Example code:
-      # output$correlation_summary_slp <- renderText({
-      #   req(input$xcol_slp, input$ycol_slp)
-      #   data <- filtered_data_slp()
-      #   
-      #   x_var <- data[[input$xcol_slp]]
-      #   y_var <- data[[input$ycol_slp]]
-      #   
-      #   cor(x_var, y_var, method = "pearson", use = "complete.obs") |> generate_correlation_summary()
-      # })
       
       output[[paste0("correlation_summary_", suf)]] <- renderText({
         req(input[[paste0("xcol_", suf)]], input[[paste0("ycol_", suf)]])
@@ -312,26 +359,6 @@ server <- function(input, output) {
       #---------------------------------------------------------------------------
       
       # Scatterplot of the 2 variables
-      # Example Code:
-      # output$scatterPlot_slp <- renderPlot({
-      #   req(input$xcol_slp, input$x_range_slp, input$ycol_slp)
-      #   
-      #   p <- filtered_data_slp() |>
-      #     ggplot(aes(x = .data[[input$xcol_slp]], y = .data[[input$ycol_slp]])) +
-      #     geom_point(aes(), size = input$size_slp) +
-      #     scale_color_colorblind()
-      #   if(input$background_slp) {
-      #     p <- p + theme_bw()
-      #   }
-      #   if(input$scatterline_slp) {
-      #     p <- p + geom_smooth(method = "lm", se = TRUE, color = "darkblue")
-      #   }
-      #   if(input$scattercurve_slp) {
-      #     p <- p + geom_smooth(se = TRUE, color = "red")
-      #   }
-      #   
-      #   p
-      # })
       
       output[[paste0("scatterPlot_", suf)]] <- renderPlot({
         req(input[[paste0("xcol_", suf)]], input[[paste0("x_range_", suf)]], input[[paste0("ycol_", suf)]])
@@ -351,6 +378,14 @@ server <- function(input, output) {
         }
         
         p
+      })
+      
+      #---------------------------------------------------------------------------
+      
+      # Information about the panel
+      
+      output[[paste0("info_text_", suf)]] <- renderUI({
+        panel_info_text[[suf]]
       })
       
     })
