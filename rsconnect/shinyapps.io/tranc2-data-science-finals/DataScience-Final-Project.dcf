@@ -1,0 +1,12 @@
+name: DataScience-Final-Project
+title: DataScience-Final-Project
+username: tranc2-data-science-finals
+account: tranc2-data-science-finals
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 16151924
+bundleId: 11222352
+url: https://tranc2-data-science-finals.shinyapps.io/DataScience-Final-Project/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE

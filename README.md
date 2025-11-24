@@ -82,3 +82,6 @@ Anyone with access to the data files and an R installation with the required pac
    install.packages(c("tidyverse", "janitor", "broom", "ggplot2", "shiny", "bslib"))
    ```
 4. Run `Finalproject.qmd` by rendering for the pdf format and `app.R` for the web presentation
+
+## Final Product
+Click [here](https://tranc2-data-science-finals.shinyapps.io/DataScience-Final-Project/) to access the project.
